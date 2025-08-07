@@ -21,7 +21,7 @@ const Header = () => {
             </div>
             <div className="flex items-center space-x-2 text-muted-foreground">
               <Users className="w-4 h-4" />
-              <span className="text-sm">청년층 대상</span>
+              <span className="text-sm">청년층(20~34세) 대상</span>
             </div>
           </div>
         </div>
