@@ -99,6 +99,43 @@ export const useSalaryData = () => {
   });
 };
 
+// 성별 대학졸업소요기간 데이터 훅
+export const useGenderGraduationData = () => {
+  return useQuery({
+    queryKey: ["gender-graduation-data"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("성_및_학제별_대학졸업소요기간" as any)
+        .select("*")
+        .in("성별", ["남자", "여자"])
+        .eq("연령구분", "15~29세")
+        .order("시점", { ascending: false })
+        .limit(2);
+
+      if (error) throw error;
+      
+      if (!data || data.length === 0) return { maleData: null, femaleData: null, period: null };
+
+      const typedData = data as any[];
+      const period = typedData[0]?.시점;
+      const maleData = typedData.find((item: any) => item.성별 === "남자");
+      const femaleData = typedData.find((item: any) => item.성별 === "여자");
+      
+      return { 
+        maleData: {
+          totalGraduates: parseInt((maleData?.["대졸자"] || "0").toString()),
+          period
+        },
+        femaleData: {
+          totalGraduates: parseInt((femaleData?.["대졸자"] || "0").toString()),
+          period
+        },
+        period
+      };
+    },
+  });
+};
+
 // 평균 임금 데이터 훅 추가
 export const useAverageSalaryData = () => {
   return useQuery({

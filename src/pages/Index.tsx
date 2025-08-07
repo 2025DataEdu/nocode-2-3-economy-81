@@ -4,7 +4,7 @@ import StatsCard from "@/components/StatsCard";
 import EmploymentChart from "@/components/dashboard/EmploymentChart";
 import SalaryDistributionChart from "@/components/dashboard/SalaryDistributionChart";
 import UnemploymentDurationChart from "@/components/dashboard/UnemploymentDurationChart";
-import { useEmploymentData, useLatestEmploymentStats, useSalaryData, useUnemploymentDurationData, useAverageSalaryData } from "@/hooks/useEconomicData";
+import { useEmploymentData, useLatestEmploymentStats, useSalaryData, useUnemploymentDurationData, useAverageSalaryData, useGenderGraduationData } from "@/hooks/useEconomicData";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -14,6 +14,7 @@ const Index = () => {
   const { data: salaryData, isLoading: salaryLoading } = useSalaryData();
   const { data: unemploymentDurationData, isLoading: unemploymentDurationLoading } = useUnemploymentDurationData();
   const { data: averageSalaryData, isLoading: averageSalaryLoading } = useAverageSalaryData();
+  const { data: genderGraduationData, isLoading: genderGraduationLoading } = useGenderGraduationData();
 
   // 최신 데이터에서 통계 계산
   const totalUnemploymentCount = unemploymentDurationData?.data?.reduce((sum, item) => sum + item.count, 0) || 0;
@@ -25,7 +26,7 @@ const Index = () => {
     unemployment_rate: item.unemployment_rate
   })) || [];
 
-  if (employmentLoading || latestStatsLoading || salaryLoading || unemploymentDurationLoading || averageSalaryLoading) {
+  if (employmentLoading || latestStatsLoading || salaryLoading || unemploymentDurationLoading || averageSalaryLoading || genderGraduationLoading) {
     return (
       <div className="min-h-screen bg-background">
         <Header />
@@ -71,18 +72,18 @@ const Index = () => {
                 description={`청년층(15~29세) 실업률${latestStats?.period ? ` (${latestStats.period})` : ""}`}
               />
               <StatsCard
-                title="취업자 수"
-                value={`${latestStats?.employed?.toLocaleString() || "0"}천명`}
+                title="남자 대졸자"
+                value={`${genderGraduationData?.maleData?.totalGraduates?.toLocaleString() || "0"}천명`}
                 changeType="neutral"
                 icon={Briefcase}
-                description={`청년층(15~29세) 취업자 수${latestStats?.period ? ` (${latestStats.period})` : ""}`}
+                description={`청년층(15~29세) 남자 대졸자 수${genderGraduationData?.period ? ` (${genderGraduationData.period})` : ""}`}
               />
               <StatsCard
-                title="첫 일자리 월평균 임금"
-                value={`${averageSalaryData?.totalCount?.toLocaleString() || "0"}천명`}
+                title="여자 대졸자"
+                value={`${genderGraduationData?.femaleData?.totalGraduates?.toLocaleString() || "0"}천명`}
                 changeType="neutral"
                 icon={PieChart}
-                description={`첫 일자리 임금 조사 대상${averageSalaryData?.period ? ` (${averageSalaryData.period})` : ""}`}
+                description={`청년층(15~29세) 여자 대졸자 수${genderGraduationData?.period ? ` (${genderGraduationData.period})` : ""}`}
               />
             </div>
 
