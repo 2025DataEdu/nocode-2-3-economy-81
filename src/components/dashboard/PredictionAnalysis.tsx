@@ -333,12 +333,18 @@ const PredictionAnalysis = () => {
             <Card>
               <CardHeader>
                 <CardTitle className="text-sm">임금 전망</CardTitle>
+                <CardDescription className="text-xs text-muted-foreground">
+                  가장 높은 비율을 차지할 것으로 예상되는 주요 임금 구간
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-2">
                 <div className="text-xs space-y-1">
-                  <p><span className="font-medium">2025:</span> {predictionData.future_predictions.salary_predictions.avg_salary_range_2025}</p>
-                  <p><span className="font-medium">2026:</span> {predictionData.future_predictions.salary_predictions.avg_salary_range_2026}</p>
-                  <p><span className="font-medium">2027:</span> {predictionData.future_predictions.salary_predictions.avg_salary_range_2027}</p>
+                  <p><span className="font-medium">2025년 주요 구간:</span> {predictionData.future_predictions.salary_predictions.avg_salary_range_2025}</p>
+                  <p><span className="font-medium">2026년 주요 구간:</span> {predictionData.future_predictions.salary_predictions.avg_salary_range_2026}</p>
+                  <p><span className="font-medium">2027년 주요 구간:</span> {predictionData.future_predictions.salary_predictions.avg_salary_range_2027}</p>
+                </div>
+                <div className="mt-2 p-2 bg-muted/30 rounded text-xs">
+                  <p className="text-muted-foreground">💡 각 연도별로 청년층 첫 일자리에서 가장 많은 비율을 차지할 것으로 예상되는 월급 구간입니다.</p>
                 </div>
               </CardContent>
             </Card>
