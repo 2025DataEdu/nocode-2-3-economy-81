@@ -50,11 +50,10 @@ const Index = () => {
       
       <main className="container mx-auto px-6 py-8">
         <Tabs defaultValue="dashboard" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="dashboard">데이터 대시보드</TabsTrigger>
             <TabsTrigger value="analysis">AI 분석 도구</TabsTrigger>
             <TabsTrigger value="chatbot">AI 챗봇</TabsTrigger>
-            <TabsTrigger value="reports" disabled>리포트</TabsTrigger>
           </TabsList>
 
           <TabsContent value="dashboard" className="space-y-6">
@@ -137,14 +136,6 @@ const Index = () => {
             <YouthEmploymentChatbot />
           </TabsContent>
 
-          <TabsContent value="reports">
-            <Card>
-              <CardHeader>
-                <CardTitle>리포트</CardTitle>
-                <CardDescription>곧 업데이트 예정입니다.</CardDescription>
-              </CardHeader>
-            </Card>
-          </TabsContent>
         </Tabs>
       </main>
     </div>
