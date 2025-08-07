@@ -183,11 +183,11 @@ const YouthEmploymentChatbot = () => {
       </Card>
 
       {/* 채팅 영역 */}
-      <Card className="h-[500px] flex flex-col">
-        <CardHeader className="flex-shrink-0">
+      <Card className="h-[600px] flex flex-col">
+        <CardHeader className="flex-shrink-0 pb-2">
           <CardTitle className="text-lg">대화</CardTitle>
         </CardHeader>
-        <CardContent className="flex-1 flex flex-col p-0">
+        <CardContent className="flex-1 flex flex-col p-0 overflow-hidden">
           <ScrollArea ref={scrollAreaRef} className="flex-1 p-4">
             <div className="space-y-4">
               {messages.map((message) => (
