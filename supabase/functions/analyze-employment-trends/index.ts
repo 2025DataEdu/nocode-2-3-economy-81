@@ -24,25 +24,48 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    console.log('Fetching employment data...');
+    console.log('Fetching comprehensive employment data...');
 
     // Fetch historical employment data
-    const { data: employmentData, error } = await supabase
+    const { data: employmentData, error: empError } = await supabase
       .from('연령별_경제활동상태')
       .select('*')
       .eq('연령별', '* 15~29세')
       .eq('수학여부', '전체')
       .order('시점', { ascending: true });
 
-    if (error) {
-      console.error('Database error:', error);
-      throw error;
+    // Fetch salary data
+    const { data: salaryData, error: salError } = await supabase
+      .from('성별_첫_일자리_월평균임금')
+      .select('*')
+      .eq('성별', '계')
+      .order('시점', { ascending: true });
+
+    // Fetch unemployment duration data
+    const { data: unemploymentData, error: unempError } = await supabase
+      .from('성별_미취업기간별_미취업자')
+      .select('*')
+      .eq('성별', '계')
+      .eq('연령별', '15~29세')
+      .order('시점', { ascending: true });
+
+    // Fetch graduation duration data
+    const { data: graduationData, error: gradError } = await supabase
+      .from('성_및_학제별_대학졸업소요기간' as any)
+      .select('*')
+      .eq('성별', '계')
+      .eq('연령구분', '15~29세')
+      .order('시점', { ascending: true });
+
+    if (empError || salError || unempError || gradError) {
+      console.error('Database errors:', { empError, salError, unempError, gradError });
+      throw empError || salError || unempError || gradError;
     }
 
-    console.log(`Fetched ${employmentData?.length} employment records`);
+    console.log(`Fetched data: employment(${employmentData?.length}), salary(${salaryData?.length}), unemployment(${unemploymentData?.length}), graduation(${graduationData?.length})`);
 
-    // Process data for analysis
-    const processedData = employmentData?.map(item => ({
+    // Process employment data
+    const processedEmploymentData = employmentData?.map(item => ({
       period: item.시점?.toString() || "",
       employment_rate: parseFloat((item.고용률 || "0").toString()),
       unemployment_rate: parseFloat((item.실업률 || "0").toString()),
@@ -51,26 +74,87 @@ serve(async (req) => {
       unemployed: parseInt((item.실업자 || "0").toString())
     })).filter(item => item.employment_rate > 0 && item.unemployment_rate > 0);
 
-    console.log(`Processed ${processedData?.length} valid records`);
+    // Process salary data
+    const processedSalaryData = salaryData?.map((item: any) => ({
+      period: item.시점?.toString() || "",
+      total_count: parseInt((item.계 || "0").toString()),
+      under_50: parseInt((item["50만원 미만"] || "0").toString()),
+      range_50_100: parseInt((item["50~100만원 미만"] || "0").toString()),
+      range_100_150: parseInt((item["100~150만원 미만"] || "0").toString()),
+      range_150_200: parseInt((item["150~200만원 미만"] || "0").toString()),
+      range_200_300: parseInt((item["200~300만원 미만"] || "0").toString()),
+      over_300: parseInt((item["300만원 이상"] || "0").toString())
+    })).filter((item: any) => item.total_count > 0);
+
+    // Process unemployment duration data
+    const processedUnemploymentData = unemploymentData?.map((item: any) => ({
+      period: item.시점?.toString() || "",
+      total: parseInt((item.계 || "0").toString()),
+      under_6months: parseInt((item["6개월 미만"] || "0").toString()),
+      months_6_12: parseInt((item["6개월~1년 미만"] || "0").toString()),
+      years_1_2: parseInt((item["1~2년 미만"] || "0").toString()),
+      years_2_3: parseInt((item["2~3년 미만"] || "0").toString()),
+      over_3years: parseInt((item["3년 이상"] || "0").toString())
+    })).filter((item: any) => item.total > 0);
+
+    // Process graduation duration data
+    const processedGraduationData = graduationData?.map((item: any) => ({
+      period: item.시점?.toString() || "",
+      total_graduates: parseInt((item.대졸자 || "0").toString()),
+      under_3year: parseInt((item["3년제이하"] || "0").toString()),
+      four_year: parseInt((item["4년제"] || "0").toString())
+    })).filter((item: any) => item.total_graduates > 0);
+
+    console.log(`Processed data: employment(${processedEmploymentData?.length}), salary(${processedSalaryData?.length}), unemployment(${processedUnemploymentData?.length}), graduation(${processedGraduationData?.length})`);
 
     const prompt = `
-당신은 한국의 청년 고용 정책 전문가입니다. 다음 청년층(15~29세) 고용률과 실업률 데이터를 분석하여 미래를 예측하고 정책을 추천해주세요.
+당신은 한국의 청년 고용 정책 전문가입니다. 다음 청년층(15~29세) 다양한 데이터를 종합 분석하여 미래를 예측하고 정책을 추천해주세요.
 
-데이터:
-${JSON.stringify(processedData, null, 2)}
+고용률/실업률 데이터:
+${JSON.stringify(processedEmploymentData?.slice(-10), null, 2)}
+
+월평균임금 분포 데이터:
+${JSON.stringify(processedSalaryData?.slice(-5), null, 2)}
+
+미취업 기간별 데이터:
+${JSON.stringify(processedUnemploymentData?.slice(-5), null, 2)}
+
+대학 졸업소요기간 데이터:
+${JSON.stringify(processedGraduationData?.slice(-5), null, 2)}
 
 다음 형식으로 응답해주세요:
 
 {
-  "trend_analysis": "과거 데이터에서 발견되는 주요 트렌드와 패턴 분석 (200자 이내)",
+  "comprehensive_analysis": "종합 데이터 분석 결과와 주요 트렌드 (300자 이내)",
   "future_predictions": {
-    "employment_rate_2025": 예측되는 2025년 고용률 (숫자),
-    "employment_rate_2026": 예측되는 2026년 고용률 (숫자),
-    "employment_rate_2027": 예측되는 2027년 고용률 (숫자),
-    "unemployment_rate_2025": 예측되는 2025년 실업률 (숫자),
-    "unemployment_rate_2026": 예측되는 2026년 실업률 (숫자),
-    "unemployment_rate_2027": 예측되는 2027년 실업률 (숫자),
-    "confidence_level": "예측 신뢰도 (높음/보통/낮음)"
+    "employment_metrics": {
+      "employment_rate_2025": 예측되는 2025년 고용률,
+      "employment_rate_2026": 예측되는 2026년 고용률,
+      "employment_rate_2027": 예측되는 2027년 고용률,
+      "unemployment_rate_2025": 예측되는 2025년 실업률,
+      "unemployment_rate_2026": 예측되는 2026년 실업률,
+      "unemployment_rate_2027": 예측되는 2027년 실업률
+    },
+    "salary_predictions": {
+      "avg_salary_range_2025": "예측되는 2025년 주요 임금 구간",
+      "avg_salary_range_2026": "예측되는 2026년 주요 임금 구간", 
+      "avg_salary_range_2027": "예측되는 2027년 주요 임금 구간",
+      "high_salary_percentage_2025": 200만원 이상 고임금 비율 2025년,
+      "high_salary_percentage_2026": 200만원 이상 고임금 비율 2026년,
+      "high_salary_percentage_2027": 200만원 이상 고임금 비율 2027년
+    },
+    "unemployment_duration": {
+      "avg_duration_trend": "미취업 기간 트렌드 전망",
+      "short_term_ratio_2025": 6개월 미만 단기 미취업 비율 2025년,
+      "short_term_ratio_2026": 6개월 미만 단기 미취업 비율 2026년,
+      "short_term_ratio_2027": 6개월 미만 단기 미취업 비율 2027년
+    },
+    "graduation_trends": {
+      "graduation_duration_2025": 예측되는 2025년 평균 졸업소요기간(개월),
+      "graduation_duration_2026": 예측되는 2026년 평균 졸업소요기간(개월),
+      "graduation_duration_2027": 예측되는 2027년 평균 졸업소요기간(개월)
+    },
+    "confidence_level": "전체 예측 신뢰도 (높음/보통/낮음)"
   },
   "policy_recommendations": [
     {
@@ -78,12 +162,13 @@ ${JSON.stringify(processedData, null, 2)}
       "title": "정책명",
       "description": "정책 설명 (100자 이내)",
       "priority": "우선순위 (높음/보통/낮음)",
-      "timeline": "실행 시기"
+      "timeline": "실행 시기",
+      "target_metric": "개선 목표 지표"
     }
   ]
 }
 
-JSON 형식으로만 응답하고, 데이터 기반의 현실적인 예측과 실용적인 정책을 제안해주세요.
+JSON 형식으로만 응답하고, 모든 데이터를 종합 분석한 현실적인 예측과 실용적인 정책을 제안해주세요.
 `;
 
     console.log('Sending request to OpenAI...');
@@ -99,7 +184,7 @@ JSON 형식으로만 응답하고, 데이터 기반의 현실적인 예측과 �
         messages: [
           {
             role: 'system',
-            content: '당신은 한국의 청년 고용 정책 전문가입니다. 데이터를 정확히 분석하고 현실적인 예측과 정책을 제안합니다.'
+            content: '당신은 한국의 청년 고용 정책 전문가입니다. 다양한 고용 관련 데이터를 종합 분석하고 현실적인 예측과 정책을 제안합니다.'
           },
           {
             role: 'user',
@@ -125,8 +210,13 @@ JSON 형식으로만 응답하고, 데이터 기반의 현실적인 예측과 �
     return new Response(JSON.stringify({
       success: true,
       data: analysisResult,
-      data_points: processedData?.length || 0,
-      last_period: processedData?.[processedData.length - 1]?.period || null
+      data_summary: {
+        employment_points: processedEmploymentData?.length || 0,
+        salary_points: processedSalaryData?.length || 0,
+        unemployment_points: processedUnemploymentData?.length || 0,
+        graduation_points: processedGraduationData?.length || 0
+      },
+      last_period: processedEmploymentData?.[processedEmploymentData.length - 1]?.period || null
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
