@@ -8,7 +8,7 @@ export const useEmploymentData = () => {
       const { data, error } = await supabase
         .from("연령별_경제활동상태")
         .select("*")
-        .eq("연령별", "* 15~29세")
+        .eq("연령별", "20~34세")
         .eq("수학여부", "전체")
         .order("시점", { ascending: true });
 
@@ -37,7 +37,7 @@ export const useLatestEmploymentStats = () => {
       const { data, error } = await supabase
         .from("연령별_경제활동상태")
         .select("*")
-        .eq("연령별", "* 15~29세")
+        .eq("연령별", "20~34세")
         .eq("수학여부", "전체")
         .order("시점", { ascending: false })
         .limit(1);
@@ -68,6 +68,7 @@ export const useSalaryData = () => {
         .from("성별_첫_일자리_월평균임금")
         .select("*")
         .eq("성별", "계")
+        .eq("연령구분", "20~34세")
         .order("시점", { ascending: false })
         .limit(1);
 
@@ -108,7 +109,7 @@ export const useGenderGraduationData = () => {
         .from("성_및_학제별_대학졸업소요기간" as any)
         .select("*")
         .in("성별", ["남자", "여자"])
-        .eq("연령구분", "15~29세")
+        .eq("연령구분", "20~34세")
         .order("시점", { ascending: false })
         .limit(2);
 
@@ -145,6 +146,7 @@ export const useAverageSalaryData = () => {
         .from("성별_첫_일자리_월평균임금")
         .select("*")
         .eq("성별", "계")
+        .eq("연령구분", "20~34세")
         .order("시점", { ascending: false })
         .limit(1);
 
@@ -169,6 +171,7 @@ export const useUnemploymentDurationData = () => {
         .from("성별_미취업기간별_미취업자")
         .select("*")
         .eq("성별", "계")
+        .eq("연령별", "20~34세")
         .order("시점", { ascending: false })
         .limit(1);
 

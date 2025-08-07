@@ -156,7 +156,7 @@ const PredictionAnalysis = () => {
             AI 기반 종합 미래 예측 분석
           </CardTitle>
           <CardDescription>
-            과거 고용, 임금, 미취업, 졸업 데이터를 종합 분석하여 AI가 다차원적 미래 트렌드를 예측하고 맞춤형 정책을 추천합니다.
+            과거 고용, 임금, 미취업, 졸업 데이터를 종합 분석하여 AI가 청년층(20~34세) 다차원적 미래 트렌드를 예측하고 맞춤형 정책을 추천합니다.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -239,7 +239,7 @@ const PredictionAnalysis = () => {
                 </Badge>
               </CardTitle>
               <CardDescription>
-                AI가 예측한 청년층 고용률과 실업률 전망
+                AI가 예측한 청년층(20~34세) 고용률과 실업률 전망
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -374,7 +374,7 @@ const PredictionAnalysis = () => {
                 종합 정책 추천
               </CardTitle>
               <CardDescription>
-                다차원 데이터 분석 결과를 바탕으로 AI가 추천하는 청년 고용 정책
+                다차원 데이터 분석 결과를 바탕으로 AI가 추천하는 청년층(20~34세) 고용 정책
               </CardDescription>
             </CardHeader>
             <CardContent>

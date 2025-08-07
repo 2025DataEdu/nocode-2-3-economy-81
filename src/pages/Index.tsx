@@ -63,28 +63,28 @@ const Index = () => {
                 value={`${latestStats?.employment_rate?.toFixed(1) || "0"}%`}
                 changeType="neutral"
                 icon={TrendingUp}
-                description={`청년층(15~29세) 고용률${latestStats?.period ? ` (${latestStats.period})` : ""}`}
+                description={`청년층(20~34세) 고용률${latestStats?.period ? ` (${latestStats.period})` : ""}`}
               />
               <StatsCard
                 title="실업률"
                 value={`${latestStats?.unemployment_rate?.toFixed(1) || "0"}%`}
                 changeType="neutral"
                 icon={Users}
-                description={`청년층(15~29세) 실업률${latestStats?.period ? ` (${latestStats.period})` : ""}`}
+                description={`청년층(20~34세) 실업률${latestStats?.period ? ` (${latestStats.period})` : ""}`}
               />
               <StatsCard
                 title="남자 대졸자의 졸업소요기간"
                 value={`${genderGraduationData?.maleData?.totalGraduates || "0"}개월`}
                 changeType="neutral"
                 icon={Briefcase}
-                description={`청년층(15~29세) 남자 대졸자 평균 졸업소요기간${genderGraduationData?.period ? ` (${genderGraduationData.period})` : ""}`}
+                description={`청년층(20~34세) 남자 대졸자 평균 졸업소요기간${genderGraduationData?.period ? ` (${genderGraduationData.period})` : ""}`}
               />
               <StatsCard
                 title="여자 대졸자의 졸업소요기간"
                 value={`${genderGraduationData?.femaleData?.totalGraduates || "0"}개월`}
                 changeType="neutral"
                 icon={PieChart}
-                description={`청년층(15~29세) 여자 대졸자 평균 졸업소요기간${genderGraduationData?.period ? ` (${genderGraduationData.period})` : ""}`}
+                description={`청년층(20~34세) 여자 대졸자 평균 졸업소요기간${genderGraduationData?.period ? ` (${genderGraduationData.period})` : ""}`}
               />
             </div>
 
