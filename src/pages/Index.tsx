@@ -1,12 +1,151 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { TrendingUp, Users, Briefcase, PieChart, BarChart } from "lucide-react";
+import Header from "@/components/Header";
+import StatsCard from "@/components/StatsCard";
+import EmploymentChart from "@/components/dashboard/EmploymentChart";
+import SalaryDistributionChart from "@/components/dashboard/SalaryDistributionChart";
+import UnemploymentDurationChart from "@/components/dashboard/UnemploymentDurationChart";
+import { useEmploymentData, useSalaryData, useUnemploymentDurationData } from "@/hooks/useEconomicData";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const Index = () => {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
+  const { data: employmentData, isLoading: employmentLoading } = useEmploymentData();
+  const { data: salaryData, isLoading: salaryLoading } = useSalaryData();
+  const { data: unemploymentDurationData, isLoading: unemploymentDurationLoading } = useUnemploymentDurationData();
+
+  // 최신 데이터에서 통계 계산
+  const latestEmploymentData = employmentData?.filter(item => item.age_group === "전체")?.slice(-1)[0];
+  const totalSalaryCount = salaryData?.reduce((sum, item) => sum + item.count, 0) || 0;
+  const totalUnemploymentCount = unemploymentDurationData?.reduce((sum, item) => sum + item.count, 0) || 0;
+
+  // 차트용 데이터 가공
+  const chartEmploymentData = employmentData
+    ?.filter(item => item.age_group === "전체")
+    ?.map(item => ({
+      period: item.period,
+      employment_rate: item.employment_rate,
+      unemployment_rate: item.unemployment_rate
+    })) || [];
+
+  if (employmentLoading || salaryLoading || unemploymentDurationLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="container mx-auto px-6 py-8">
+          <div className="flex items-center justify-center h-64">
+            <div className="text-center">
+              <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+              <p className="text-muted-foreground">데이터를 불러오는 중...</p>
+            </div>
+          </div>
+        </div>
       </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-background">
+      <Header />
+      
+      <main className="container mx-auto px-6 py-8">
+        <Tabs defaultValue="dashboard" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="dashboard">데이터 대시보드</TabsTrigger>
+            <TabsTrigger value="analysis" disabled>분석 도구</TabsTrigger>
+            <TabsTrigger value="reports" disabled>리포트</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="dashboard" className="space-y-6">
+            {/* 주요 지표 카드 */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <StatsCard
+                title="고용률"
+                value={`${latestEmploymentData?.employment_rate?.toFixed(1) || "0"}%`}
+                changeType="neutral"
+                icon={TrendingUp}
+                description="전체 청년층 고용률"
+              />
+              <StatsCard
+                title="실업률"
+                value={`${latestEmploymentData?.unemployment_rate?.toFixed(1) || "0"}%`}
+                changeType="neutral"
+                icon={Users}
+                description="전체 청년층 실업률"
+              />
+              <StatsCard
+                title="임금 조사 대상"
+                value={totalSalaryCount.toLocaleString()}
+                changeType="neutral"
+                icon={Briefcase}
+                description="첫 일자리 임금 데이터"
+              />
+              <StatsCard
+                title="미취업자 조사"
+                value={totalUnemploymentCount.toLocaleString()}
+                changeType="neutral"
+                icon={PieChart}
+                description="미취업 기간별 데이터"
+              />
+            </div>
+
+            {/* 차트 그리드 */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <EmploymentChart data={chartEmploymentData} />
+              <SalaryDistributionChart data={salaryData || []} />
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <UnemploymentDurationChart data={unemploymentDurationData || []} />
+              
+              <Card className="bg-card border border-border shadow-soft">
+                <CardHeader>
+                  <CardTitle className="text-foreground flex items-center gap-2">
+                    <BarChart className="w-5 h-5" />
+                    데이터 요약
+                  </CardTitle>
+                  <CardDescription className="text-muted-foreground">
+                    현재 대시보드의 주요 데이터 포인트
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
+                      <span className="text-sm font-medium text-foreground">총 데이터 테이블</span>
+                      <span className="text-sm font-bold text-primary">8개</span>
+                    </div>
+                    <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
+                      <span className="text-sm font-medium text-foreground">분석 기간</span>
+                      <span className="text-sm font-bold text-primary">최신 데이터</span>
+                    </div>
+                    <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
+                      <span className="text-sm font-medium text-foreground">대상 연령층</span>
+                      <span className="text-sm font-bold text-primary">청년층</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="analysis">
+            <Card>
+              <CardHeader>
+                <CardTitle>분석 도구</CardTitle>
+                <CardDescription>곧 업데이트 예정입니다.</CardDescription>
+              </CardHeader>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="reports">
+            <Card>
+              <CardHeader>
+                <CardTitle>리포트</CardTitle>
+                <CardDescription>곧 업데이트 예정입니다.</CardDescription>
+              </CardHeader>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </main>
     </div>
   );
 };

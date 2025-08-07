@@ -1,0 +1,97 @@
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+
+export const useEmploymentData = () => {
+  return useQuery({
+    queryKey: ["employment-data"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("연령별_경제활동상태")
+        .select("*")
+        .order("시점", { ascending: true });
+
+      if (error) throw error;
+      
+      // 데이터 변환 로직
+      return data.map(item => ({
+        period: item.시점?.toString() || "",
+        age_group: item.연령별 || "",
+        employment_rate: parseFloat(item.고용률 || "0"),
+        unemployment_rate: parseFloat(item.실업률 || "0"),
+        youth_population: parseInt(item.청년층인구 || "0"),
+        economically_active: parseInt(item.경제활동인구 || "0"),
+        employed: parseInt(item.취업자 || "0"),
+        unemployed: parseInt(item.실업자 || "0")
+      }));
+    },
+  });
+};
+
+export const useSalaryData = () => {
+  return useQuery({
+    queryKey: ["salary-data"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("성별_첫_일자리_월평균임금")
+        .select("*")
+        .eq("성별", "계")
+        .order("시점", { ascending: false })
+        .limit(1);
+
+      if (error) throw error;
+      
+      if (!data || data.length === 0) return [];
+
+      const latestData = data[0];
+      
+      return [
+        { range: "50만원 미만", count: parseInt((latestData["50만원 미만"] || "0").toString()) },
+        { range: "50~100만원", count: parseInt((latestData["50~100만원 미만"] || "0").toString()) },
+        { range: "100~150만원", count: parseInt((latestData["100~150만원 미만"] || "0").toString()) },
+        { range: "150~200만원", count: parseInt((latestData["150~200만원 미만"] || "0").toString()) },
+        { range: "200~300만원", count: parseInt((latestData["200~300만원 미만"] || "0").toString()) },
+        { range: "300만원 이상", count: parseInt((latestData["300만원 이상"] || "0").toString()) }
+      ].map(item => {
+        const total = data[0]["계"] ? parseInt(data[0]["계"].toString()) : 0;
+        return {
+          ...item,
+          percentage: total > 0 ? parseFloat(((item.count / total) * 100).toFixed(1)) : 0
+        };
+      }).filter(item => item.count > 0);
+    },
+  });
+};
+
+export const useUnemploymentDurationData = () => {
+  return useQuery({
+    queryKey: ["unemployment-duration-data"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("성별_미취업기간별_미취업자")
+        .select("*")
+        .eq("성별", "계")
+        .order("시점", { ascending: false })
+        .limit(1);
+
+      if (error) throw error;
+      
+      if (!data || data.length === 0) return [];
+
+      const latestData = data[0];
+      
+      return [
+        { duration: "6개월 미만", count: parseInt((latestData["6개월 미만"] || "0").toString()) },
+        { duration: "6개월~1년 미만", count: parseInt((latestData["6개월~1년 미만"] || "0").toString()) },
+        { duration: "1~2년 미만", count: parseInt((latestData["1~2년 미만"] || "0").toString()) },
+        { duration: "2~3년 미만", count: parseInt((latestData["2~3년 미만"] || "0").toString()) },
+        { duration: "3년 이상", count: parseInt((latestData["3년 이상"] || "0").toString()) }
+      ].map(item => {
+        const total = data[0]["계"] ? parseInt(data[0]["계"].toString()) : 0;
+        return {
+          ...item,
+          percentage: total > 0 ? parseFloat(((item.count / total) * 100).toFixed(1)) : 0
+        };
+      }).filter(item => item.count > 0);
+    },
+  });
+};
