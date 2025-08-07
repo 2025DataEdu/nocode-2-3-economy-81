@@ -8,6 +8,8 @@ export const useEmploymentData = () => {
       const { data, error } = await supabase
         .from("연령별_경제활동상태")
         .select("*")
+        .eq("연령별", "* 15~29세")
+        .eq("수학여부", "전체")
         .order("시점", { ascending: true });
 
       if (error) throw error;
@@ -16,13 +18,44 @@ export const useEmploymentData = () => {
       return data.map(item => ({
         period: item.시점?.toString() || "",
         age_group: item.연령별 || "",
-        employment_rate: parseFloat(item.고용률 || "0"),
-        unemployment_rate: parseFloat(item.실업률 || "0"),
-        youth_population: parseInt(item.청년층인구 || "0"),
-        economically_active: parseInt(item.경제활동인구 || "0"),
-        employed: parseInt(item.취업자 || "0"),
-        unemployed: parseInt(item.실업자 || "0")
+        employment_rate: parseFloat((item.고용률 || "0").toString()),
+        unemployment_rate: parseFloat((item.실업률 || "0").toString()),
+        youth_population: parseInt((item.청년층인구 || "0").toString()),
+        economically_active: parseInt((item.경제활동인구 || "0").toString()),
+        employed: parseInt((item.취업자 || "0").toString()),
+        unemployed: parseInt((item.실업자 || "0").toString())
       }));
+    },
+  });
+};
+
+// 최신 고용 통계 데이터만 가져오는 훅
+export const useLatestEmploymentStats = () => {
+  return useQuery({
+    queryKey: ["latest-employment-stats"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("연령별_경제활동상태")
+        .select("*")
+        .eq("연령별", "* 15~29세")
+        .eq("수학여부", "전체")
+        .order("시점", { ascending: false })
+        .limit(1);
+
+      if (error) throw error;
+      
+      if (!data || data.length === 0) return null;
+      
+      const latest = data[0];
+      return {
+        period: latest.시점?.toString() || "",
+        employment_rate: parseFloat((latest.고용률 || "0").toString()),
+        unemployment_rate: parseFloat((latest.실업률 || "0").toString()),
+        youth_population: parseInt((latest.청년층인구 || "0").toString()),
+        economically_active: parseInt((latest.경제활동인구 || "0").toString()),
+        employed: parseInt((latest.취업자 || "0").toString()),
+        unemployed: parseInt((latest.실업자 || "0").toString())
+      };
     },
   });
 };

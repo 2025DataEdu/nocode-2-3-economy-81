@@ -4,31 +4,28 @@ import StatsCard from "@/components/StatsCard";
 import EmploymentChart from "@/components/dashboard/EmploymentChart";
 import SalaryDistributionChart from "@/components/dashboard/SalaryDistributionChart";
 import UnemploymentDurationChart from "@/components/dashboard/UnemploymentDurationChart";
-import { useEmploymentData, useSalaryData, useUnemploymentDurationData } from "@/hooks/useEconomicData";
+import { useEmploymentData, useLatestEmploymentStats, useSalaryData, useUnemploymentDurationData } from "@/hooks/useEconomicData";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const Index = () => {
   const { data: employmentData, isLoading: employmentLoading } = useEmploymentData();
+  const { data: latestStats, isLoading: latestStatsLoading } = useLatestEmploymentStats();
   const { data: salaryData, isLoading: salaryLoading } = useSalaryData();
   const { data: unemploymentDurationData, isLoading: unemploymentDurationLoading } = useUnemploymentDurationData();
 
   // 최신 데이터에서 통계 계산
-  const latestEmploymentData = employmentData?.filter(item => item.age_group === "전체")?.slice(-1)[0];
-  const latestEmploymentPeriod = latestEmploymentData?.period;
   const totalSalaryCount = salaryData?.data?.reduce((sum, item) => sum + item.count, 0) || 0;
   const totalUnemploymentCount = unemploymentDurationData?.data?.reduce((sum, item) => sum + item.count, 0) || 0;
 
-  // 차트용 데이터 가공
-  const chartEmploymentData = employmentData
-    ?.filter(item => item.age_group === "전체")
-    ?.map(item => ({
-      period: item.period,
-      employment_rate: item.employment_rate,
-      unemployment_rate: item.unemployment_rate
-    })) || [];
+  // 차트용 데이터 가공 - 15~29세 전체 데이터만 사용
+  const chartEmploymentData = employmentData?.map(item => ({
+    period: item.period,
+    employment_rate: item.employment_rate,
+    unemployment_rate: item.unemployment_rate
+  })) || [];
 
-  if (employmentLoading || salaryLoading || unemploymentDurationLoading) {
+  if (employmentLoading || latestStatsLoading || salaryLoading || unemploymentDurationLoading) {
     return (
       <div className="min-h-screen bg-background">
         <Header />
@@ -61,17 +58,17 @@ const Index = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <StatsCard
                 title="고용률"
-                value={`${latestEmploymentData?.employment_rate?.toFixed(1) || "0"}%`}
+                value={`${latestStats?.employment_rate?.toFixed(1) || "0"}%`}
                 changeType="neutral"
                 icon={TrendingUp}
-                description={`전체 청년층 고용률${latestEmploymentPeriod ? ` (${latestEmploymentPeriod})` : ""}`}
+                description={`청년층(15~29세) 고용률${latestStats?.period ? ` (${latestStats.period})` : ""}`}
               />
               <StatsCard
                 title="실업률"
-                value={`${latestEmploymentData?.unemployment_rate?.toFixed(1) || "0"}%`}
+                value={`${latestStats?.unemployment_rate?.toFixed(1) || "0"}%`}
                 changeType="neutral"
                 icon={Users}
-                description={`전체 청년층 실업률${latestEmploymentPeriod ? ` (${latestEmploymentPeriod})` : ""}`}
+                description={`청년층(15~29세) 실업률${latestStats?.period ? ` (${latestStats.period})` : ""}`}
               />
               <StatsCard
                 title="임금 조사 대상"
@@ -91,7 +88,7 @@ const Index = () => {
 
             {/* 차트 그리드 */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <EmploymentChart data={chartEmploymentData} latestPeriod={latestEmploymentPeriod} />
+              <EmploymentChart data={chartEmploymentData} latestPeriod={latestStats?.period} />
               <SalaryDistributionChart data={salaryData?.data || []} period={salaryData?.period} />
             </div>
 
