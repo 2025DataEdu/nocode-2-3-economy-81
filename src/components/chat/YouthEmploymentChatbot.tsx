@@ -60,23 +60,24 @@ const YouthEmploymentChatbot = () => {
     scrollToBottom();
   }, [messages]);
 
-  const handleSendMessage = async () => {
-    if (!input.trim() || isLoading) return;
+  const handleSendMessage = async (messageText?: string) => {
+    const textToSend = messageText || input.trim();
+    if (!textToSend || isLoading) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
       type: 'user',
-      content: input,
+      content: textToSend,
       timestamp: new Date(),
     };
 
     setMessages(prev => [...prev, userMessage]);
-    setInput("");
+    if (!messageText) setInput(""); // 직접 입력한 경우만 input 초기화
     setIsLoading(true);
 
     try {
       const { data, error } = await supabase.functions.invoke('youth-employment-chat', {
-        body: { question: input }
+        body: { question: textToSend }
       });
 
       if (error) throw error;
@@ -122,7 +123,7 @@ const YouthEmploymentChatbot = () => {
   };
 
   const handleExampleClick = (question: string) => {
-    setInput(question);
+    handleSendMessage(question);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -279,7 +280,7 @@ const YouthEmploymentChatbot = () => {
                 className="flex-1"
               />
               <Button 
-                onClick={handleSendMessage}
+                onClick={() => handleSendMessage()}
                 disabled={isLoading || !input.trim()}
                 size="icon"
               >
