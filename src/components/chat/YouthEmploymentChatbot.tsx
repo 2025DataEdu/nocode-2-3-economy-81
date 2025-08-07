@@ -1,0 +1,296 @@
+import { useState, useRef, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
+import { MessageCircle, Send, Bot, User, Lightbulb, Database } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
+
+interface Message {
+  id: string;
+  type: 'user' | 'bot';
+  content: string;
+  timestamp: Date;
+  sources?: string[];
+  dataPoints?: number;
+}
+
+// 예시 질문들
+const EXAMPLE_QUESTIONS = [
+  "현재 청년층 고용률과 실업률은 어떻게 되나요?",
+  "청년층 첫 일자리 평균 임금은 얼마인가요?",
+  "졸업 후 첫 취업까지 평균 얼마나 걸리나요?",
+  "미취업 기간이 긴 청년들의 비율은 어떻게 되나요?",
+  "청년 고용률이 가장 높았던 시기는 언제인가요?",
+  "200만원 이상 고임금을 받는 청년 비율은?",
+  "최근 3년간 청년 고용 상황의 변화는?",
+  "청년 실업자 수는 얼마나 되나요?",
+  "6개월 이상 미취업 상태인 청년 비율은?",
+  "청년층 경제활동 참가율은 어떻게 되나요?",
+  "첫 일자리에서 300만원 이상 받는 청년 비율은?",
+  "청년 고용률과 실업률의 최근 트렌드는?"
+];
+
+const YouthEmploymentChatbot = () => {
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      id: '1',
+      type: 'bot',
+      content: '안녕하세요! 저는 청년층(20~34세) 고용 데이터 전문 챗봇입니다. 실제 통계청 데이터를 바탕으로 정확한 정보를 제공해드립니다. 궁금한 것이 있으시면 언제든 물어보세요!',
+      timestamp: new Date(),
+    }
+  ]);
+  const [input, setInput] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
+
+  const scrollToBottom = () => {
+    if (scrollAreaRef.current) {
+      const scrollContainer = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
+      if (scrollContainer) {
+        scrollContainer.scrollTop = scrollContainer.scrollHeight;
+      }
+    }
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const handleSendMessage = async () => {
+    if (!input.trim() || isLoading) return;
+
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      type: 'user',
+      content: input,
+      timestamp: new Date(),
+    };
+
+    setMessages(prev => [...prev, userMessage]);
+    setInput("");
+    setIsLoading(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('youth-employment-chat', {
+        body: { question: input }
+      });
+
+      if (error) throw error;
+
+      const botMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        type: 'bot',
+        content: data.success ? data.answer : '죄송합니다. 오류가 발생했습니다.',
+        timestamp: new Date(),
+        sources: data.sources || [],
+        dataPoints: data.data_used || 0
+      };
+
+      setMessages(prev => [...prev, botMessage]);
+
+      if (!data.success) {
+        toast({
+          title: "오류 발생",
+          description: data.error || "알 수 없는 오류가 발생했습니다.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Chat error:', error);
+      
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        type: 'bot',
+        content: '죄송합니다. 현재 서비스에 문제가 있습니다. 잠시 후 다시 시도해주세요.',
+        timestamp: new Date(),
+      };
+
+      setMessages(prev => [...prev, errorMessage]);
+
+      toast({
+        title: "연결 오류",
+        description: "챗봇 서비스에 연결할 수 없습니다.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleExampleClick = (question: string) => {
+    setInput(question);
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
+  };
+
+  const formatTimestamp = (date: Date) => {
+    return date.toLocaleTimeString('ko-KR', { 
+      hour: '2-digit', 
+      minute: '2-digit' 
+    });
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* 헤더 */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <MessageCircle className="w-5 h-5" />
+            청년 고용 데이터 챗봇
+          </CardTitle>
+          <CardDescription>
+            실제 통계청 데이터를 기반으로 한 RAG 시스템으로 정확한 청년 고용 정보를 제공합니다.
+          </CardDescription>
+        </CardHeader>
+      </Card>
+
+      {/* 예시 질문들 */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Lightbulb className="w-4 h-4" />
+            추천 질문
+          </CardTitle>
+          <CardDescription>
+            아래 질문들을 클릭하거나 직접 질문을 입력해보세요
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+            {EXAMPLE_QUESTIONS.map((question, index) => (
+              <Button
+                key={index}
+                variant="outline"
+                size="sm"
+                className="h-auto p-3 text-left justify-start whitespace-normal"
+                onClick={() => handleExampleClick(question)}
+              >
+                <span className="text-xs">{question}</span>
+              </Button>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* 채팅 영역 */}
+      <Card className="h-[500px] flex flex-col">
+        <CardHeader className="flex-shrink-0">
+          <CardTitle className="text-lg">대화</CardTitle>
+        </CardHeader>
+        <CardContent className="flex-1 flex flex-col p-0">
+          <ScrollArea ref={scrollAreaRef} className="flex-1 p-4">
+            <div className="space-y-4">
+              {messages.map((message) => (
+                <div
+                  key={message.id}
+                  className={`flex gap-3 ${
+                    message.type === 'user' ? 'justify-end' : 'justify-start'
+                  }`}
+                >
+                  {message.type === 'bot' && (
+                    <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                      <Bot className="w-4 h-4 text-primary-foreground" />
+                    </div>
+                  )}
+                  
+                  <div className={`max-w-[80%] ${message.type === 'user' ? 'order-1' : ''}`}>
+                    <div
+                      className={`rounded-lg p-3 ${
+                        message.type === 'user'
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-muted'
+                      }`}
+                    >
+                      <div className="text-sm whitespace-pre-wrap">{message.content}</div>
+                      
+                      {message.sources && message.sources.length > 0 && (
+                        <div className="mt-2 pt-2 border-t border-border/30">
+                          <div className="flex items-center gap-1 mb-1">
+                            <Database className="w-3 h-3" />
+                            <span className="text-xs font-medium">데이터 출처:</span>
+                          </div>
+                          <div className="flex flex-wrap gap-1">
+                            {message.sources.map((source, idx) => (
+                              <Badge key={idx} variant="secondary" className="text-xs">
+                                {source}
+                              </Badge>
+                            ))}
+                          </div>
+                          {message.dataPoints && (
+                            <div className="text-xs text-muted-foreground mt-1">
+                              {message.dataPoints}개 데이터 포인트 활용
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className={`text-xs text-muted-foreground mt-1 ${
+                      message.type === 'user' ? 'text-right' : 'text-left'
+                    }`}>
+                      {formatTimestamp(message.timestamp)}
+                    </div>
+                  </div>
+
+                  {message.type === 'user' && (
+                    <div className="w-8 h-8 bg-secondary rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                      <User className="w-4 h-4 text-secondary-foreground" />
+                    </div>
+                  )}
+                </div>
+              ))}
+              
+              {isLoading && (
+                <div className="flex gap-3 justify-start">
+                  <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                    <Bot className="w-4 h-4 text-primary-foreground" />
+                  </div>
+                  <div className="bg-muted rounded-lg p-3">
+                    <div className="flex space-x-1">
+                      <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce"></div>
+                      <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                      <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </ScrollArea>
+
+          {/* 입력 영역 */}
+          <div className="flex-shrink-0 p-4 border-t border-border">
+            <div className="flex gap-2">
+              <Input
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="청년 고용에 관해 궁금한 것을 물어보세요..."
+                disabled={isLoading}
+                className="flex-1"
+              />
+              <Button 
+                onClick={handleSendMessage}
+                disabled={isLoading || !input.trim()}
+                size="icon"
+              >
+                <Send className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+export default YouthEmploymentChatbot;

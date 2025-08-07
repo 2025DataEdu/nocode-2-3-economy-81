@@ -64,3 +64,6 @@ max_frequency = "5m"
 
 [functions.analyze-employment-trends]
 verify_jwt = false
+
+[functions.youth-employment-chat]
+verify_jwt = false
