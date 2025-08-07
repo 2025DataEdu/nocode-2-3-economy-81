@@ -181,11 +181,11 @@ export const useUnemploymentDurationData = () => {
       
       
       const unemploymentDuration = [
-        { duration: "6개월 미만", count: parseInt((latestData["6개월 미만"] || "0").toString()) },
-        { duration: "6개월~1년 미만", count: parseInt((latestData["6개월~1년 미만"] || "0").toString()) },
-        { duration: "1~2년 미만", count: parseInt((latestData["1~2년 미만"] || "0").toString()) },
-        { duration: "2~3년 미만", count: parseInt((latestData["2~3년 미만"] || "0").toString()) },
-        { duration: "3년 이상", count: parseInt((latestData["3년 이상"] || "0").toString()) }
+        { duration: "6개월미만", count: parseInt((latestData["6개월 미만"] || "0").toString()) },
+        { duration: "6개월~1년미만", count: parseInt((latestData["6개월~1년 미만"] || "0").toString()) },
+        { duration: "1~2년미만", count: parseInt((latestData["1~2년 미만"] || "0").toString()) },
+        { duration: "2~3년미만", count: parseInt((latestData["2~3년 미만"] || "0").toString()) },
+        { duration: "3년이상", count: parseInt((latestData["3년 이상"] || "0").toString()) }
       ].map(item => {
         const total = data[0]["계"] ? parseInt(data[0]["계"].toString()) : 0;
         return {

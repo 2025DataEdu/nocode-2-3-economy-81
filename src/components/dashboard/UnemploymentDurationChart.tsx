@@ -25,9 +25,9 @@ const UnemploymentDurationChart = ({ data, period }: UnemploymentDurationChartPr
       const data = payload[0].payload;
       return (
         <div className="bg-card border border-border rounded-lg p-3 shadow-medium">
-          <p className="font-semibold text-foreground">{`기간: ${data.duration}`}</p>
+          <p className="font-semibold text-foreground">{`기간: ${data.duration.replace('개월', '개월').replace('년', '년')}`}</p>
           <p className="text-sm text-chart-primary">
-            인원: {data.count.toLocaleString()}명
+            인원: {data.count.toLocaleString()}천명
           </p>
           <p className="text-sm text-chart-secondary">
             비율: {data.percentage}%
