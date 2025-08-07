@@ -72,18 +72,18 @@ const Index = () => {
                 description={`청년층(15~29세) 실업률${latestStats?.period ? ` (${latestStats.period})` : ""}`}
               />
               <StatsCard
-                title="남자 대졸자"
-                value={`${genderGraduationData?.maleData?.totalGraduates?.toLocaleString() || "0"}천명`}
+                title="남자 대졸자의 졸업소요기간"
+                value={`${genderGraduationData?.maleData?.totalGraduates || "0"}개월`}
                 changeType="neutral"
                 icon={Briefcase}
-                description={`청년층(15~29세) 남자 대졸자 수${genderGraduationData?.period ? ` (${genderGraduationData.period})` : ""}`}
+                description={`청년층(15~29세) 남자 대졸자 평균 졸업소요기간${genderGraduationData?.period ? ` (${genderGraduationData.period})` : ""}`}
               />
               <StatsCard
-                title="여자 대졸자"
-                value={`${genderGraduationData?.femaleData?.totalGraduates?.toLocaleString() || "0"}천명`}
+                title="여자 대졸자의 졸업소요기간"
+                value={`${genderGraduationData?.femaleData?.totalGraduates || "0"}개월`}
                 changeType="neutral"
                 icon={PieChart}
-                description={`청년층(15~29세) 여자 대졸자 수${genderGraduationData?.period ? ` (${genderGraduationData.period})` : ""}`}
+                description={`청년층(15~29세) 여자 대졸자 평균 졸업소요기간${genderGraduationData?.period ? ` (${genderGraduationData.period})` : ""}`}
               />
             </div>
 
