@@ -82,6 +82,9 @@ const UnemploymentDurationChart = ({ data, period }: UnemploymentDurationChartPr
               outerRadius={120}
               fill="#8884d8"
               dataKey="count"
+              nameKey="duration"
+              startAngle={90}
+              endAngle={450}
             >
               {data.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
