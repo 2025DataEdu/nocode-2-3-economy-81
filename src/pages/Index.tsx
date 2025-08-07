@@ -4,6 +4,7 @@ import StatsCard from "@/components/StatsCard";
 import EmploymentChart from "@/components/dashboard/EmploymentChart";
 import SalaryDistributionChart from "@/components/dashboard/SalaryDistributionChart";
 import UnemploymentDurationChart from "@/components/dashboard/UnemploymentDurationChart";
+import PredictionAnalysis from "@/components/dashboard/PredictionAnalysis";
 import { useEmploymentData, useLatestEmploymentStats, useSalaryData, useUnemploymentDurationData, useAverageSalaryData, useGenderGraduationData } from "@/hooks/useEconomicData";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -50,7 +51,7 @@ const Index = () => {
         <Tabs defaultValue="dashboard" className="space-y-6">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="dashboard">데이터 대시보드</TabsTrigger>
-            <TabsTrigger value="analysis" disabled>분석 도구</TabsTrigger>
+            <TabsTrigger value="analysis">AI 분석 도구</TabsTrigger>
             <TabsTrigger value="reports" disabled>리포트</TabsTrigger>
           </TabsList>
 
@@ -126,13 +127,8 @@ const Index = () => {
             </div>
           </TabsContent>
 
-          <TabsContent value="analysis">
-            <Card>
-              <CardHeader>
-                <CardTitle>분석 도구</CardTitle>
-                <CardDescription>곧 업데이트 예정입니다.</CardDescription>
-              </CardHeader>
-            </Card>
+          <TabsContent value="analysis" className="space-y-6">
+            <PredictionAnalysis />
           </TabsContent>
 
           <TabsContent value="reports">
