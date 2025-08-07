@@ -110,11 +110,11 @@ const Index = () => {
                   <div className="space-y-3">
                     <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
                       <span className="text-sm font-medium text-foreground">총 데이터 테이블</span>
-                      <span className="text-sm font-bold text-primary">8개</span>
+                      <span className="text-sm font-bold text-primary">21개</span>
                     </div>
                     <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
                       <span className="text-sm font-medium text-foreground">분석 기간</span>
-                      <span className="text-sm font-bold text-primary">최신 데이터</span>
+                      <span className="text-sm font-bold text-primary">2004.05~현재</span>
                     </div>
                     <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
                       <span className="text-sm font-medium text-foreground">대상 연령층</span>
