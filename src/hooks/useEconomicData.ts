@@ -99,6 +99,31 @@ export const useSalaryData = () => {
   });
 };
 
+// 평균 임금 데이터 훅 추가
+export const useAverageSalaryData = () => {
+  return useQuery({
+    queryKey: ["average-salary-data"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("성별_첫_일자리_월평균임금")
+        .select("*")
+        .eq("성별", "계")
+        .order("시점", { ascending: false })
+        .limit(1);
+
+      if (error) throw error;
+      
+      if (!data || data.length === 0) return { totalCount: 0, period: null };
+
+      const latestData = data[0];
+      const period = latestData.시점;
+      const totalCount = parseInt((latestData["계"] || "0").toString());
+      
+      return { totalCount, period };
+    },
+  });
+};
+
 export const useUnemploymentDurationData = () => {
   return useQuery({
     queryKey: ["unemployment-duration-data"],
