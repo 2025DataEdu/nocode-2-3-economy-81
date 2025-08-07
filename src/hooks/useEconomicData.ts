@@ -40,11 +40,13 @@ export const useSalaryData = () => {
 
       if (error) throw error;
       
-      if (!data || data.length === 0) return [];
+      if (!data || data.length === 0) return { data: [], period: null };
 
       const latestData = data[0];
+      const period = latestData.시점;
       
-      return [
+      
+      const salaryDistribution = [
         { range: "50만원 미만", count: parseInt((latestData["50만원 미만"] || "0").toString()) },
         { range: "50~100만원", count: parseInt((latestData["50~100만원 미만"] || "0").toString()) },
         { range: "100~150만원", count: parseInt((latestData["100~150만원 미만"] || "0").toString()) },
@@ -58,6 +60,8 @@ export const useSalaryData = () => {
           percentage: total > 0 ? parseFloat(((item.count / total) * 100).toFixed(1)) : 0
         };
       }).filter(item => item.count > 0);
+
+      return { data: salaryDistribution, period };
     },
   });
 };
@@ -75,11 +79,13 @@ export const useUnemploymentDurationData = () => {
 
       if (error) throw error;
       
-      if (!data || data.length === 0) return [];
+      if (!data || data.length === 0) return { data: [], period: null };
 
       const latestData = data[0];
+      const period = latestData.시점;
       
-      return [
+      
+      const unemploymentDuration = [
         { duration: "6개월 미만", count: parseInt((latestData["6개월 미만"] || "0").toString()) },
         { duration: "6개월~1년 미만", count: parseInt((latestData["6개월~1년 미만"] || "0").toString()) },
         { duration: "1~2년 미만", count: parseInt((latestData["1~2년 미만"] || "0").toString()) },
@@ -92,6 +98,8 @@ export const useUnemploymentDurationData = () => {
           percentage: total > 0 ? parseFloat(((item.count / total) * 100).toFixed(1)) : 0
         };
       }).filter(item => item.count > 0);
+
+      return { data: unemploymentDuration, period };
     },
   });
 };

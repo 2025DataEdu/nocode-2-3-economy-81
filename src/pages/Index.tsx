@@ -15,8 +15,9 @@ const Index = () => {
 
   // 최신 데이터에서 통계 계산
   const latestEmploymentData = employmentData?.filter(item => item.age_group === "전체")?.slice(-1)[0];
-  const totalSalaryCount = salaryData?.reduce((sum, item) => sum + item.count, 0) || 0;
-  const totalUnemploymentCount = unemploymentDurationData?.reduce((sum, item) => sum + item.count, 0) || 0;
+  const latestEmploymentPeriod = latestEmploymentData?.period;
+  const totalSalaryCount = salaryData?.data?.reduce((sum, item) => sum + item.count, 0) || 0;
+  const totalUnemploymentCount = unemploymentDurationData?.data?.reduce((sum, item) => sum + item.count, 0) || 0;
 
   // 차트용 데이터 가공
   const chartEmploymentData = employmentData
@@ -63,39 +64,39 @@ const Index = () => {
                 value={`${latestEmploymentData?.employment_rate?.toFixed(1) || "0"}%`}
                 changeType="neutral"
                 icon={TrendingUp}
-                description="전체 청년층 고용률"
+                description={`전체 청년층 고용률${latestEmploymentPeriod ? ` (${latestEmploymentPeriod})` : ""}`}
               />
               <StatsCard
                 title="실업률"
                 value={`${latestEmploymentData?.unemployment_rate?.toFixed(1) || "0"}%`}
                 changeType="neutral"
                 icon={Users}
-                description="전체 청년층 실업률"
+                description={`전체 청년층 실업률${latestEmploymentPeriod ? ` (${latestEmploymentPeriod})` : ""}`}
               />
               <StatsCard
                 title="임금 조사 대상"
                 value={totalSalaryCount.toLocaleString()}
                 changeType="neutral"
                 icon={Briefcase}
-                description="첫 일자리 임금 데이터"
+                description={`첫 일자리 임금 데이터${salaryData?.period ? ` (${salaryData.period})` : ""}`}
               />
               <StatsCard
                 title="미취업자 조사"
                 value={totalUnemploymentCount.toLocaleString()}
                 changeType="neutral"
                 icon={PieChart}
-                description="미취업 기간별 데이터"
+                description={`미취업 기간별 데이터${unemploymentDurationData?.period ? ` (${unemploymentDurationData.period})` : ""}`}
               />
             </div>
 
             {/* 차트 그리드 */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <EmploymentChart data={chartEmploymentData} />
-              <SalaryDistributionChart data={salaryData || []} />
+              <EmploymentChart data={chartEmploymentData} latestPeriod={latestEmploymentPeriod} />
+              <SalaryDistributionChart data={salaryData?.data || []} period={salaryData?.period} />
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <UnemploymentDurationChart data={unemploymentDurationData || []} />
+              <UnemploymentDurationChart data={unemploymentDurationData?.data || []} period={unemploymentDurationData?.period} />
               
               <Card className="bg-card border border-border shadow-soft">
                 <CardHeader>

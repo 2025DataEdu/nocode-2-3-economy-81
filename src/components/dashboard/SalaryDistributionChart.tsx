@@ -7,9 +7,10 @@ interface SalaryDistributionChartProps {
     count: number;
     percentage: number;
   }>;
+  period?: number | null;
 }
 
-const SalaryDistributionChart = ({ data }: SalaryDistributionChartProps) => {
+const SalaryDistributionChart = ({ data, period }: SalaryDistributionChartProps) => {
   const colors = [
     "hsl(var(--chart-primary))",
     "hsl(var(--chart-secondary))",
@@ -43,6 +44,7 @@ const SalaryDistributionChart = ({ data }: SalaryDistributionChartProps) => {
         <CardTitle className="text-foreground">첫 일자리 월평균 임금 분포</CardTitle>
         <CardDescription className="text-muted-foreground">
           청년층의 첫 일자리 급여 수준별 분포 현황
+          {period && <span className="block text-xs mt-1 text-primary font-medium">기준시점: {period}</span>}
         </CardDescription>
       </CardHeader>
       <CardContent>

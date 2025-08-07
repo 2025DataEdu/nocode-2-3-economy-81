@@ -7,9 +7,10 @@ interface EmploymentChartProps {
     employment_rate: number;
     unemployment_rate: number;
   }>;
+  latestPeriod?: string;
 }
 
-const EmploymentChart = ({ data }: EmploymentChartProps) => {
+const EmploymentChart = ({ data, latestPeriod }: EmploymentChartProps) => {
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
@@ -32,6 +33,7 @@ const EmploymentChart = ({ data }: EmploymentChartProps) => {
         <CardTitle className="text-foreground">연령별 고용률 및 실업률 추이</CardTitle>
         <CardDescription className="text-muted-foreground">
           청년층의 고용률과 실업률 변화를 시각화한 차트입니다
+          {latestPeriod && <span className="block text-xs mt-1 text-primary font-medium">최신 데이터: {latestPeriod}</span>}
         </CardDescription>
       </CardHeader>
       <CardContent>
