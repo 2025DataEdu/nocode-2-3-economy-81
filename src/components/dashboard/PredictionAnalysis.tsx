@@ -131,19 +131,19 @@ const PredictionAnalysis = () => {
       year: "2025",
       high_salary_percentage: predictionData.future_predictions.salary_predictions.high_salary_percentage_2025,
       short_term_unemployment: predictionData.future_predictions.unemployment_duration.short_term_ratio_2025,
-      employment_duration: predictionData.future_predictions.employment_duration_trends.avg_duration_2025,
+      employment_duration: predictionData.future_predictions.employment_duration_trends?.avg_duration_2025 || 0,
     },
     {
       year: "2026",
       high_salary_percentage: predictionData.future_predictions.salary_predictions.high_salary_percentage_2026,
       short_term_unemployment: predictionData.future_predictions.unemployment_duration.short_term_ratio_2026,
-      employment_duration: predictionData.future_predictions.employment_duration_trends.avg_duration_2026,
+      employment_duration: predictionData.future_predictions.employment_duration_trends?.avg_duration_2026 || 0,
     },
     {
       year: "2027",
       high_salary_percentage: predictionData.future_predictions.salary_predictions.high_salary_percentage_2027,
       short_term_unemployment: predictionData.future_predictions.unemployment_duration.short_term_ratio_2027,
-      employment_duration: predictionData.future_predictions.employment_duration_trends.avg_duration_2027,
+      employment_duration: predictionData.future_predictions.employment_duration_trends?.avg_duration_2027 || 0,
     }
   ] : [];
 
@@ -368,9 +368,9 @@ const PredictionAnalysis = () => {
               </CardHeader>
               <CardContent className="space-y-1">
                 <div className="text-xs space-y-1">
-                  <p><span className="font-medium">2025년:</span> {predictionData.future_predictions.employment_duration_trends.avg_duration_2025}개월</p>
-                  <p><span className="font-medium">2026년:</span> {predictionData.future_predictions.employment_duration_trends.avg_duration_2026}개월</p>
-                  <p><span className="font-medium">2027년:</span> {predictionData.future_predictions.employment_duration_trends.avg_duration_2027}개월</p>
+                  <p><span className="font-medium">2025년:</span> {predictionData.future_predictions.employment_duration_trends?.avg_duration_2025 || "N/A"}개월</p>
+                  <p><span className="font-medium">2026년:</span> {predictionData.future_predictions.employment_duration_trends?.avg_duration_2026 || "N/A"}개월</p>
+                  <p><span className="font-medium">2027년:</span> {predictionData.future_predictions.employment_duration_trends?.avg_duration_2027 || "N/A"}개월</p>
                 </div>
               </CardContent>
             </Card>
