@@ -33,10 +33,11 @@ interface PredictionData {
       short_term_ratio_2026: number;
       short_term_ratio_2027: number;
     };
-    graduation_trends: {
-      graduation_duration_2025: number;
-      graduation_duration_2026: number;
-      graduation_duration_2027: number;
+    employment_duration_trends: {
+      avg_duration_trend: string;
+      avg_duration_2025: number;
+      avg_duration_2026: number;
+      avg_duration_2027: number;
     };
     confidence_level: string;
   };
@@ -130,19 +131,19 @@ const PredictionAnalysis = () => {
       year: "2025",
       high_salary_percentage: predictionData.future_predictions.salary_predictions.high_salary_percentage_2025,
       short_term_unemployment: predictionData.future_predictions.unemployment_duration.short_term_ratio_2025,
-      graduation_duration: predictionData.future_predictions.graduation_trends.graduation_duration_2025,
+      employment_duration: predictionData.future_predictions.employment_duration_trends.avg_duration_2025,
     },
     {
       year: "2026",
       high_salary_percentage: predictionData.future_predictions.salary_predictions.high_salary_percentage_2026,
       short_term_unemployment: predictionData.future_predictions.unemployment_duration.short_term_ratio_2026,
-      graduation_duration: predictionData.future_predictions.graduation_trends.graduation_duration_2026,
+      employment_duration: predictionData.future_predictions.employment_duration_trends.avg_duration_2026,
     },
     {
       year: "2027",
       high_salary_percentage: predictionData.future_predictions.salary_predictions.high_salary_percentage_2027,
       short_term_unemployment: predictionData.future_predictions.unemployment_duration.short_term_ratio_2027,
-      graduation_duration: predictionData.future_predictions.graduation_trends.graduation_duration_2027,
+      employment_duration: predictionData.future_predictions.employment_duration_trends.avg_duration_2027,
     }
   ] : [];
 
@@ -156,7 +157,7 @@ const PredictionAnalysis = () => {
             AI 기반 종합 미래 예측 분석
           </CardTitle>
           <CardDescription>
-            과거 고용, 임금, 미취업, 졸업 데이터를 종합 분석하여 AI가 청년층(20~34세) 다차원적 미래 트렌드를 예측하고 맞춤형 정책을 추천합니다.
+            과거 고용, 임금, 미취업, 첫 취업 소요기간 데이터를 종합 분석하여 AI가 청년층(20~34세) 다차원적 미래 트렌드를 예측하고 맞춤형 정책을 추천합니다.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -188,7 +189,7 @@ const PredictionAnalysis = () => {
               <Alert>
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>
-                  분석 기준: 고용({dataSummary?.employment_points}), 임금({dataSummary?.salary_points}), 미취업({dataSummary?.unemployment_points}), 졸업({dataSummary?.graduation_points}) 데이터 포인트 (최신: {lastPeriod})
+                  분석 기준: 고용({dataSummary?.employment_points}), 임금({dataSummary?.salary_points}), 미취업({dataSummary?.unemployment_points}), 취업소요기간({dataSummary?.employment_duration_points}) 데이터 포인트 (최신: {lastPeriod})
                 </AlertDescription>
               </Alert>
               <Button 
@@ -282,7 +283,7 @@ const PredictionAnalysis = () => {
             <CardHeader>
               <CardTitle className="text-lg">다차원 예측 지표 (2025-2027)</CardTitle>
               <CardDescription>
-                임금, 미취업기간, 졸업소요기간 등 종합 예측 지표
+                임금, 미취업기간, 첫 취업 소요기간 등 종합 예측 지표
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -317,10 +318,10 @@ const PredictionAnalysis = () => {
                   />
                   <Line 
                     type="monotone" 
-                    dataKey="graduation_duration" 
+                    dataKey="employment_duration" 
                     stroke="hsl(var(--chart-tertiary))" 
                     strokeWidth={3}
-                    name="졸업소요기간 (개월)"
+                    name="첫 취업 소요기간 (개월)"
                     dot={{ fill: "hsl(var(--chart-tertiary))", strokeWidth: 2, r: 4 }}
                   />
                 </LineChart>
@@ -360,13 +361,16 @@ const PredictionAnalysis = () => {
             
             <Card>
               <CardHeader>
-                <CardTitle className="text-sm">졸업소요기간 전망</CardTitle>
+                <CardTitle className="text-sm">첫 취업 소요기간 전망</CardTitle>
+                <CardDescription className="text-xs text-muted-foreground">
+                  졸업 후 첫 취업까지 걸리는 평균 기간 예측
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-1">
                 <div className="text-xs space-y-1">
-                  <p><span className="font-medium">2025:</span> {predictionData.future_predictions.graduation_trends.graduation_duration_2025}개월</p>
-                  <p><span className="font-medium">2026:</span> {predictionData.future_predictions.graduation_trends.graduation_duration_2026}개월</p>
-                  <p><span className="font-medium">2027:</span> {predictionData.future_predictions.graduation_trends.graduation_duration_2027}개월</p>
+                  <p><span className="font-medium">2025년:</span> {predictionData.future_predictions.employment_duration_trends.avg_duration_2025}개월</p>
+                  <p><span className="font-medium">2026년:</span> {predictionData.future_predictions.employment_duration_trends.avg_duration_2026}개월</p>
+                  <p><span className="font-medium">2027년:</span> {predictionData.future_predictions.employment_duration_trends.avg_duration_2027}개월</p>
                 </div>
               </CardContent>
             </Card>

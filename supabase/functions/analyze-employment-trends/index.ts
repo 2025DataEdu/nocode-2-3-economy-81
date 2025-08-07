@@ -49,20 +49,20 @@ serve(async (req) => {
       .eq('연령별', '20~34세')
       .order('시점', { ascending: true });
 
-    // Fetch graduation duration data
-    const { data: graduationData, error: gradError } = await supabase
-      .from('성_및_학제별_대학졸업소요기간' as any)
+    // Fetch employment duration data
+    const { data: employmentDurationData, error: empDurError } = await supabase
+      .from('성별_첫_취업_소요기간_및_평균소요기간' as any)
       .select('*')
-      .eq('성별', '계')
+      .eq('전체', '전체')
       .eq('연령구분', '20~34세')
       .order('시점', { ascending: true });
 
-    if (empError || salError || unempError || gradError) {
-      console.error('Database errors:', { empError, salError, unempError, gradError });
-      throw empError || salError || unempError || gradError;
+    if (empError || salError || unempError || empDurError) {
+      console.error('Database errors:', { empError, salError, unempError, empDurError });
+      throw empError || salError || unempError || empDurError;
     }
 
-    console.log(`Fetched data: employment(${employmentData?.length}), salary(${salaryData?.length}), unemployment(${unemploymentData?.length}), graduation(${graduationData?.length})`);
+    console.log(`Fetched data: employment(${employmentData?.length}), salary(${salaryData?.length}), unemployment(${unemploymentData?.length}), employment_duration(${employmentDurationData?.length})`);
 
     // Process employment data
     const processedEmploymentData = employmentData?.map(item => ({
@@ -97,15 +97,20 @@ serve(async (req) => {
       over_3years: parseInt((item["3년 이상"] || "0").toString())
     })).filter((item: any) => item.total > 0);
 
-    // Process graduation duration data
-    const processedGraduationData = graduationData?.map((item: any) => ({
+    // Process employment duration data
+    const processedEmploymentDurationData = employmentDurationData?.map((item: any) => ({
       period: item.시점?.toString() || "",
-      total_graduates: parseInt((item.대졸자 || "0").toString()),
-      under_3year: parseInt((item["3년제이하"] || "0").toString()),
-      four_year: parseInt((item["4년제"] || "0").toString())
-    })).filter((item: any) => item.total_graduates > 0);
+      total_experienced: parseInt((item["졸업ㆍ중퇴 후 취업 유경험자 전체"] || "0").toString()),
+      avg_duration_months: parseInt((item["첫 취업 평균소요기간"] || "0").toString()),
+      under_3months: parseInt((item["3개월 미만"] || "0").toString()),
+      months_3_6: parseInt((item["3~6개월 미만"] || "0").toString()),
+      months_6_12: parseInt((item["6개월~1년 미만"] || "0").toString()),
+      years_1_2: parseInt((item["1~2년 미만"] || "0").toString()),
+      years_2_3: parseInt((item["2~3년 미만"] || "0").toString()),
+      over_3years: parseInt((item["3년 이상"] || "0").toString())
+    })).filter((item: any) => item.total_experienced > 0);
 
-    console.log(`Processed data: employment(${processedEmploymentData?.length}), salary(${processedSalaryData?.length}), unemployment(${processedUnemploymentData?.length}), graduation(${processedGraduationData?.length})`);
+    console.log(`Processed data: employment(${processedEmploymentData?.length}), salary(${processedSalaryData?.length}), unemployment(${processedUnemploymentData?.length}), employment_duration(${processedEmploymentDurationData?.length})`);
 
     const prompt = `
 당신은 한국의 청년 고용 정책 전문가입니다. 다음 청년층(20~34세) 다양한 데이터를 종합 분석하여 미래를 예측하고 정책을 추천해주세요.
@@ -119,8 +124,8 @@ ${JSON.stringify(processedSalaryData?.slice(-5), null, 2)}
 미취업 기간별 데이터:
 ${JSON.stringify(processedUnemploymentData?.slice(-5), null, 2)}
 
-대학 졸업소요기간 데이터:
-${JSON.stringify(processedGraduationData?.slice(-5), null, 2)}
+첫 취업 소요기간 데이터:
+${JSON.stringify(processedEmploymentDurationData?.slice(-5), null, 2)}
 
 다음 형식으로 응답해주세요:
 
@@ -149,10 +154,11 @@ ${JSON.stringify(processedGraduationData?.slice(-5), null, 2)}
       "short_term_ratio_2026": 6개월 미만 단기 미취업 비율 2026년,
       "short_term_ratio_2027": 6개월 미만 단기 미취업 비율 2027년
     },
-    "graduation_trends": {
-      "graduation_duration_2025": 예측되는 2025년 평균 졸업소요기간(개월),
-      "graduation_duration_2026": 예측되는 2026년 평균 졸업소요기간(개월),
-      "graduation_duration_2027": 예측되는 2027년 평균 졸업소요기간(개월)
+    "employment_duration_trends": {
+      "avg_duration_trend": "첫 취업 소요기간 트렌드 전망",
+      "avg_duration_2025": 예측되는 2025년 평균 첫 취업 소요기간(개월),
+      "avg_duration_2026": 예측되는 2026년 평균 첫 취업 소요기간(개월),
+      "avg_duration_2027": 예측되는 2027년 평균 첫 취업 소요기간(개월)
     },
     "confidence_level": "전체 예측 신뢰도 (높음/보통/낮음)"
   },
@@ -214,7 +220,7 @@ JSON 형식으로만 응답하고, 모든 데이터를 종합 분석한 현실�
         employment_points: processedEmploymentData?.length || 0,
         salary_points: processedSalaryData?.length || 0,
         unemployment_points: processedUnemploymentData?.length || 0,
-        graduation_points: processedGraduationData?.length || 0
+        employment_duration_points: processedEmploymentDurationData?.length || 0
       },
       last_period: processedEmploymentData?.[processedEmploymentData.length - 1]?.period || null
     }), {
