@@ -115,6 +115,9 @@ serve(async (req) => {
     const prompt = `
 당신은 한국의 청년 고용 정책 전문가입니다. 다음 청년층(20~34세) 다양한 데이터를 종합 분석하여 미래를 예측하고 정책을 추천해주세요.
 
+[정의]
+- 본 서비스에서 "고임금"은 "월 300만원 이상"을 의미합니다.
+
 고용률/실업률 데이터:
 ${JSON.stringify(processedEmploymentData?.slice(-10), null, 2)}
 
@@ -144,9 +147,9 @@ ${JSON.stringify(processedEmploymentDurationData?.slice(-5), null, 2)}
       "avg_salary_range_2025": "예측되는 2025년 주요 임금 구간",
       "avg_salary_range_2026": "예측되는 2026년 주요 임금 구간", 
       "avg_salary_range_2027": "예측되는 2027년 주요 임금 구간",
-      "high_salary_percentage_2025": 200만원 이상 고임금 비율 2025년,
-      "high_salary_percentage_2026": 200만원 이상 고임금 비율 2026년,
-      "high_salary_percentage_2027": 200만원 이상 고임금 비율 2027년
+      "high_salary_percentage_2025": 300만원 이상 고임금 비율 2025년,
+      "high_salary_percentage_2026": 300만원 이상 고임금 비율 2026년,
+      "high_salary_percentage_2027": 300만원 이상 고임금 비율 2027년
     },
     "unemployment_duration": {
       "avg_duration_trend": "미취업 기간 트렌드 전망",
