@@ -1,4 +1,4 @@
-import { TrendingUp, Users, Briefcase, PieChart, BarChart } from "lucide-react";
+import { TrendingUp, Users, Briefcase, PieChart } from "lucide-react";
 import Header from "@/components/Header";
 import StatsCard from "@/components/StatsCard";
 import EmploymentChart from "@/components/dashboard/EmploymentChart";
@@ -6,6 +6,7 @@ import SalaryDistributionChart from "@/components/dashboard/SalaryDistributionCh
 import UnemploymentDurationChart from "@/components/dashboard/UnemploymentDurationChart";
 import PredictionAnalysis from "@/components/dashboard/PredictionAnalysis";
 import YouthEmploymentChatbot from "@/components/chat/YouthEmploymentChatbot";
+import DataStatusCard from "@/components/dashboard/DataStatusCard";
 import { useEmploymentData, useLatestEmploymentStats, useSalaryData, useUnemploymentDurationData, useAverageSalaryData, useGenderGraduationData } from "@/hooks/useEconomicData";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -57,6 +58,9 @@ const Index = () => {
           </TabsList>
 
           <TabsContent value="dashboard" className="space-y-6">
+            {/* 사용 데이터 현황 */}
+            <DataStatusCard />
+            
             {/* 주요 지표 카드 */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <StatsCard
@@ -95,37 +99,7 @@ const Index = () => {
               <SalaryDistributionChart data={salaryData?.data || []} period={salaryData?.period} />
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <UnemploymentDurationChart data={unemploymentDurationData?.data || []} period={unemploymentDurationData?.period} />
-              
-              <Card className="bg-card border border-border shadow-soft">
-                <CardHeader>
-                  <CardTitle className="text-foreground flex items-center gap-2">
-                    <BarChart className="w-5 h-5" />
-                    데이터 요약
-                  </CardTitle>
-                  <CardDescription className="text-muted-foreground">
-                    현재 대시보드의 주요 데이터 포인트
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
-                      <span className="text-sm font-medium text-foreground">총 데이터 테이블</span>
-                      <span className="text-sm font-bold text-primary">21개</span>
-                    </div>
-                    <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
-                      <span className="text-sm font-medium text-foreground">분석 기간</span>
-                      <span className="text-sm font-bold text-primary">2004.05~현재</span>
-                    </div>
-                    <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
-                      <span className="text-sm font-medium text-foreground">대상 연령층</span>
-                      <span className="text-sm font-bold text-primary">청년층</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+            <UnemploymentDurationChart data={unemploymentDurationData?.data || []} period={unemploymentDurationData?.period} />
           </TabsContent>
 
           <TabsContent value="analysis" className="space-y-6">
