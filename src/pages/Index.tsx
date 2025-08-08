@@ -21,6 +21,10 @@ const Index = () => {
   const { data: genderGraduationData, isLoading: genderGraduationLoading } = useGenderGraduationData();
   const { data: industryPieData, isLoading: industryPieLoading } = useIndustryDistributionPieData();
 
+  // 디버깅용 콘솔 로그
+  console.log("Industry Pie Data:", industryPieData);
+  console.log("Industry Pie Loading:", industryPieLoading);
+
   // 최신 데이터에서 통계 계산
   const totalUnemploymentCount = unemploymentDurationData?.data?.reduce((sum, item) => sum + item.count, 0) || 0;
 
