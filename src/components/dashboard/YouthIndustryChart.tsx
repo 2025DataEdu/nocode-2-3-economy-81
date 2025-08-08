@@ -78,7 +78,7 @@ const YouthIndustryChart = ({ data, totalEmployed, period }: YouthIndustryChartP
       <CardHeader>
         <CardTitle className="text-foreground">청년층 산업별 취업분포</CardTitle>
         <CardDescription className="text-muted-foreground">
-          졸업/중퇴 청년층(20~34세)의 산업별 취업자 분포 (상위 16개 산업)
+          졸업/중퇴 청년층(20~34세)의 산업별 취업자 분포
           {period && (
             <span className="block text-xs mt-1 text-primary font-medium">
               기준시점: {period} | 총 취업자: {totalEmployed.toLocaleString()}천명
