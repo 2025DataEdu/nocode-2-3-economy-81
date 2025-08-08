@@ -211,7 +211,7 @@ export const useIndustryDistributionPieData = () => {
         .from("졸업_중퇴_취업자의_산업별_취업분포_11차" as any)
         .select("*")
         .eq("연령구분(1)", "20~34세")
-        .eq("시점", 25.5)
+        .eq("시점", 2025.05)
         .order("졸업/중퇴 청년층 취업자", { ascending: false });
 
       if (error) throw error;
@@ -237,7 +237,7 @@ export const useIndustryDistributionPieData = () => {
         percentage: total > 0 ? parseFloat(((item.value / total) * 100).toFixed(1)) : 0
       }));
 
-      return { data: withPercentage, period: 25.5 };
+      return { data: withPercentage, period: 2025.05 };
     },
   });
 };
