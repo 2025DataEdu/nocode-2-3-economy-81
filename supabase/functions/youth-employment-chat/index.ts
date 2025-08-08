@@ -289,7 +289,7 @@ async function searchAllDatasets(supabase: any) {
       // 6. ★★★ 졸업중퇴 취업자의 산업별 취업분포 (핵심) - 2025.05 최신 데이터만
       supabase.from('졸업_중퇴_취업자의_산업별_취업분포_11차')
         .select('*')
-        .eq('연령구분(1)', '20~34세')
+        .eq('"연령구분(1)"', '20~34세')  // 쌍따옴표로 컬럼명 감싸기
         .eq('시점', 2025.05)  // 최신 데이터만 조회
         .order('"졸업/중퇴 청년층 취업자"', { ascending: false }),
       
@@ -419,10 +419,18 @@ async function searchAllDatasets(supabase: any) {
       { name: '근속기간', data: continuousEmploymentResult.data, key: 'continuousEmployment' }
     ];
 
+    // 각 데이터셋별 결과 수 로깅 (디버깅용)
+    results.forEach(result => {
+      const count = result.data?.length || 0;
+      console.log(`${result.name}: ${count} rows`);
+      if (result.name === '★산업별 취업분포★' && count === 0) {
+        console.error('CRITICAL: 산업별 취업분포 데이터가 0개입니다!', industryResult.error);
+      }
+    });
+
     // 모든 데이터 수집 및 로깅
     results.forEach(result => {
       const dataCount = result.data?.length || 0;
-      console.log(`${result.name}: ${dataCount} rows`);
       
       if (dataCount > 0) {
         allData[result.key] = result.data;
