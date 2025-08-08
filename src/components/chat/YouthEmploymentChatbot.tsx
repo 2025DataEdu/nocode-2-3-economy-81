@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { MessageCircle, Send, Bot, User, Lightbulb, Database, Download } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 import { useToast } from "@/components/ui/use-toast";
 
 interface Message {
@@ -141,76 +142,88 @@ const YouthEmploymentChatbot = () => {
     });
   };
 
-  const downloadChatHistory = () => {
-    const pdf = new jsPDF();
-    
-    // PDF 설정 - 한글 폰트 문제로 기본 폰트 사용하고 로마자로 제목 설정
-    pdf.setFontSize(16);
-    pdf.text('Youth Employment Chat History', 20, 20);
-    
-    pdf.setFontSize(12);
-    const currentDate = new Date().toLocaleDateString('ko-KR');
-    pdf.text(`Export Date: ${currentDate}`, 20, 30);
-    
-    let yPosition = 50;
-    const pageHeight = pdf.internal.pageSize.height;
-    const marginBottom = 20;
-    
-    messages.forEach((message, index) => {
-      // 페이지 끝에 가까우면 새 페이지 생성
-      if (yPosition > pageHeight - marginBottom) {
-        pdf.addPage();
-        yPosition = 20;
+  const downloadChatHistory = async () => {
+    try {
+      // 채팅 컨테이너 찾기
+      const chatContainer = scrollAreaRef.current;
+      if (!chatContainer) {
+        toast({
+          title: "오류",
+          description: "채팅 내용을 찾을 수 없습니다.",
+          variant: "destructive",
+        });
+        return;
       }
-      
-      // 메시지 타입 표시
-      pdf.setFontSize(10);
-      const sender = message.type === 'user' ? 'User' : 'AI Bot';
-      const timestamp = message.timestamp.toLocaleString('ko-KR');
-      pdf.text(`[${sender}] ${timestamp}`, 20, yPosition);
-      yPosition += 7;
-      
-      // 메시지 내용 (한글 텍스트를 ASCII로 변환하지 않고 그대로 사용)
-      pdf.setFontSize(9);
-      const content = message.content;
-      
-      // 텍스트를 여러 줄로 분할 (한 줄당 최대 글자 수 제한)
-      const maxLineWidth = 170;
-      const lines = pdf.splitTextToSize(content, maxLineWidth);
-      
-      lines.forEach((line: string) => {
-        if (yPosition > pageHeight - marginBottom) {
-          pdf.addPage();
-          yPosition = 20;
-        }
-        pdf.text(line, 25, yPosition);
-        yPosition += 5;
+
+      // 로딩 상태 표시
+      toast({
+        title: "PDF 생성 중",
+        description: "채팅 기록을 PDF로 변환하고 있습니다...",
       });
-      
-      // 데이터 출처가 있는 경우 추가
-      if (message.sources && message.sources.length > 0) {
-        yPosition += 3;
-        pdf.setFontSize(8);
-        pdf.text('Data Sources: ' + message.sources.join(', '), 25, yPosition);
-        yPosition += 5;
-        
-        if (message.dataPoints) {
-          pdf.text(`Data Points Used: ${message.dataPoints}`, 25, yPosition);
-          yPosition += 5;
+
+      // HTML을 캔버스로 변환
+      const canvas = await html2canvas(chatContainer, {
+        scale: 2, // 고해상도
+        useCORS: true,
+        backgroundColor: '#ffffff',
+        width: chatContainer.scrollWidth,
+        height: chatContainer.scrollHeight,
+        onclone: (clonedDoc) => {
+          // 복제된 문서에서 불필요한 요소들 제거
+          const scrollbars = clonedDoc.querySelectorAll('[data-radix-scroll-area-scrollbar]');
+          scrollbars.forEach(el => el.remove());
         }
-      }
+      });
+
+      // PDF 생성
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+      const imgWidth = 210; // A4 width in mm
+      const pageHeight = 295; // A4 height in mm
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+      let position = 0;
+
+      // 첫 페이지에 제목 추가
+      pdf.setFontSize(16);
+      pdf.text('Youth Employment Chat History', 20, 20);
+      pdf.setFontSize(12);
+      pdf.text(`Generated: ${new Date().toLocaleDateString('ko-KR')}`, 20, 30);
       
-      yPosition += 10; // 메시지 간 간격
-    });
-    
-    // PDF 다운로드
-    const filename = `youth-employment-chat-${new Date().toISOString().split('T')[0]}.pdf`;
-    pdf.save(filename);
-    
-    toast({
-      title: "다운로드 완료",
-      description: "채팅 기록이 PDF로 저장되었습니다.",
-    });
+      // 이미지를 여러 페이지에 나누어 추가
+      position = 40; // 제목 아래부터 시작
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight - position;
+
+      while (heightLeft >= 0) {
+        position = heightLeft - imgHeight + (pageHeight - position);
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      // PDF 저장
+      const filename = `youth-employment-chat-${new Date().toISOString().split('T')[0]}.pdf`;
+      pdf.save(filename);
+
+      toast({
+        title: "다운로드 완료",
+        description: "채팅 기록이 한글 지원 PDF로 저장되었습니다.",
+      });
+
+    } catch (error) {
+      console.error('PDF generation error:', error);
+      toast({
+        title: "PDF 생성 실패",
+        description: "PDF 생성 중 오류가 발생했습니다.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
