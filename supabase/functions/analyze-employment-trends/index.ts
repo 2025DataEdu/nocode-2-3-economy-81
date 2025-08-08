@@ -186,7 +186,7 @@ JSON 형식으로만 응답하고, 모든 데이터를 종합 분석한 현실�
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'o3-2025-04-16', // 최신 O3 추론 모델로 업그레이드 (복합적 데이터 분석에 최적)
         messages: [
           {
             role: 'system',
