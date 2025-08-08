@@ -1,5 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend } from "recharts";
+import { useState } from "react";
 
 interface UnemploymentDurationChartProps {
   data: Array<{
@@ -11,6 +12,8 @@ interface UnemploymentDurationChartProps {
 }
 
 const UnemploymentDurationChart = ({ data, period }: UnemploymentDurationChartProps) => {
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  
   const colors = [
     "hsl(var(--chart-primary))",
     "hsl(var(--chart-secondary))",
@@ -19,6 +22,15 @@ const UnemploymentDurationChart = ({ data, period }: UnemploymentDurationChartPr
     "hsl(214 84% 70%)",
     "hsl(142 76% 50%)"
   ];
+
+  // 마우스 오버 이벤트 핸들러
+  const onPieEnter = (data: any, index: number) => {
+    setHoveredIndex(index);
+  };
+
+  const onPieLeave = () => {
+    setHoveredIndex(null);
+  };
 
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
@@ -85,9 +97,21 @@ const UnemploymentDurationChart = ({ data, period }: UnemploymentDurationChartPr
               nameKey="duration"
               startAngle={90}
               endAngle={-270}
+              onMouseEnter={onPieEnter}
+              onMouseLeave={onPieLeave}
             >
               {data.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+                <Cell 
+                  key={`cell-${index}`} 
+                  fill={colors[index % colors.length]}
+                  style={{
+                    filter: hoveredIndex === index ? 'brightness(1.1)' : 'brightness(1)',
+                    transform: hoveredIndex === index ? 'scale(1.05)' : 'scale(1)',
+                    transformOrigin: 'center',
+                    transition: 'all 0.2s ease-in-out',
+                    cursor: 'pointer'
+                  }}
+                />
               ))}
             </Pie>
             <Tooltip content={<CustomTooltip />} />
