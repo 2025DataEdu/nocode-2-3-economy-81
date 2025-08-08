@@ -1,5 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
 
 interface IndustryData {
   industry: string;
@@ -13,6 +13,26 @@ interface YouthIndustryChartProps {
   period?: string;
 }
 
+// 막대별 색상 팔레트
+const BAR_COLORS = [
+  "hsl(220, 70%, 50%)",    // 파란색
+  "hsl(160, 60%, 45%)",    // 청록색  
+  "hsl(30, 80%, 55%)",     // 주황색
+  "hsl(340, 75%, 55%)",    // 분홍색
+  "hsl(270, 70%, 50%)",    // 보라색
+  "hsl(80, 60%, 45%)",     // 연두색
+  "hsl(200, 80%, 50%)",    // 하늘색
+  "hsl(15, 70%, 50%)",     // 빨간색
+  "hsl(45, 90%, 55%)",     // 노란색
+  "hsl(300, 70%, 50%)",    // 자주색
+  "hsl(120, 60%, 40%)",    // 초록색
+  "hsl(60, 70%, 50%)",     // 라임색
+  "hsl(240, 70%, 50%)",    // 남색
+  "hsl(180, 60%, 45%)",    // 민트색
+  "hsl(0, 70%, 50%)",      // 빨간색
+  "hsl(320, 70%, 50%)",    // 핫핑크
+];
+
 const YouthIndustryChart = ({ data, totalEmployed, period }: YouthIndustryChartProps) => {
   // 산업명을 짧게 줄이는 함수
   const shortenIndustryName = (name: string) => {
@@ -23,15 +43,16 @@ const YouthIndustryChart = ({ data, totalEmployed, period }: YouthIndustryChartP
       .replace(")", "")
       .replace(/[A-Z]/g, "")
       .trim()
-      .substring(0, 8);
+      .substring(0, 12);
   };
 
   // 데이터를 막대차트용으로 변환 (이미 정렬되어 있음)
-  const chartData = data.map(item => ({
+  const chartData = data.map((item, index) => ({
     name: shortenIndustryName(item.industry),
     fullName: item.industry,
     value: item.employed,
-    percentage: item.percentage
+    percentage: item.percentage,
+    color: BAR_COLORS[index % BAR_COLORS.length]
   }));
   // 툴팁 커스터마이징
   const CustomTooltip = ({ active, payload, label }: any) => {
@@ -66,36 +87,37 @@ const YouthIndustryChart = ({ data, totalEmployed, period }: YouthIndustryChartP
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <ResponsiveContainer width="100%" height={500}>
+        <ResponsiveContainer width="100%" height={600}>
           <BarChart
+            layout="horizontal"
             data={chartData}
             margin={{
               top: 20,
-              right: 30,
-              left: 20,
-              bottom: 80,
+              right: 40,
+              left: 120,
+              bottom: 20,
             }}
           >
             <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
             <XAxis 
-              dataKey="name" 
-              angle={-45}
-              textAnchor="end"
-              height={80}
-              fontSize={11}
-              className="text-muted-foreground"
-            />
-            <YAxis 
+              type="number"
               fontSize={11}
               className="text-muted-foreground"
               tickFormatter={(value) => `${value}천명`}
             />
-            <Tooltip content={<CustomTooltip />} />
-            <Bar 
-              dataKey="value" 
-              fill="hsl(var(--primary))"
-              radius={[4, 4, 0, 0]}
+            <YAxis 
+              type="category"
+              dataKey="name" 
+              fontSize={11}
+              className="text-muted-foreground"
+              width={110}
             />
+            <Tooltip content={<CustomTooltip />} />
+            <Bar dataKey="value" radius={[0, 4, 4, 0]}>
+              {chartData.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={entry.color} />
+              ))}
+            </Bar>
           </BarChart>
         </ResponsiveContainer>
       </CardContent>
