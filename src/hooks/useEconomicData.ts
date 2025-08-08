@@ -211,7 +211,6 @@ export const useIndustryEmploymentDistributionData = () => {
       const { data: latestRow, error: latestErr } = await supabase
         .from("졸업_중퇴_취업자의_산업별_취업분포_11차" as any)
         .select("*")
-        .eq("연령구분(1)", "20~34세")
         .order("시점", { ascending: false })
         .limit(1);
       if (latestErr) throw latestErr;
