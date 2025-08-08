@@ -128,16 +128,52 @@ async function searchRelevantData(supabase: any, question: string) {
     salary: null,
     unemployment: null,
     employmentDuration: null,
-    majorMatch: null
+    majorMatch: null,
+    industryEmployment: null
   };
 
-  // 키워드 기반으로 관련 데이터 검색
+  // 키워드 기반으로 관련 데이터 검색 (유의어 포함)
   const questionLower = question.toLowerCase();
   
+  // 유의어 매핑
+  const synonyms = {
+    취업분포: ['취업분포', '산업별 취업', '업종별 취업', '직업분포', '일자리 분포', '고용분포'],
+    고용률: ['고용률', '취업률', '일자리율'],
+    실업률: ['실업률', '무직률', '비취업률'],
+    취업자: ['취업자', '고용자', '일자리', '직장인'],
+    임금: ['임금', '월급', '급여', '소득', '연봉', '수입'],
+    미취업: ['미취업', '구직', '무직', '실업'],
+    전공: ['전공', '학과', '전공일치', '전공과 일치'],
+    청년: ['청년', '청년층', '젊은층', '20대', '30대']
+  };
+
+  // 질문에서 유의어 검색
+  function hasKeyword(keywords: string[]): boolean {
+    return keywords.some(keyword => questionLower.includes(keyword));
+  }
+  
   try {
+    // 산업별 취업분포 관련 질문 (가장 먼저 체크)
+    if (hasKeyword(synonyms.취업분포) || questionLower.includes('산업') || 
+        questionLower.includes('업종') || questionLower.includes('분포')) {
+      
+      const { data: industryData } = await supabase
+        .from('졸업_중퇴_취업자의_산업별_취업분포_11차')
+        .select('*')
+        .eq('연령구분(1)', '20~34세')
+        .order('시점', { ascending: false })
+        .limit(20);
+      
+      if (industryData?.length > 0) {
+        relevantData.industryEmployment = industryData;
+        relevantData.sources.push('졸업중퇴 취업자의 산업별 취업분포');
+        relevantData.dataPoints += industryData.length;
+      }
+    }
+
     // 고용률/실업률 관련 질문
-    if (questionLower.includes('고용률') || questionLower.includes('실업률') || 
-        questionLower.includes('취업자') || questionLower.includes('경제활동')) {
+    if (hasKeyword(synonyms.고용률) || hasKeyword(synonyms.실업률) || 
+        hasKeyword(synonyms.취업자) || questionLower.includes('경제활동')) {
       
       const { data: employmentData } = await supabase
         .from('연령별_경제활동상태')
@@ -155,8 +191,7 @@ async function searchRelevantData(supabase: any, question: string) {
     }
 
     // 임금 관련 질문
-    if (questionLower.includes('임금') || questionLower.includes('월급') || 
-        questionLower.includes('급여') || questionLower.includes('소득')) {
+    if (hasKeyword(synonyms.임금)) {
       
       const { data: salaryData } = await supabase
         .from('성별_첫_일자리_월평균임금')
@@ -174,8 +209,7 @@ async function searchRelevantData(supabase: any, question: string) {
     }
 
     // 미취업 기간 관련 질문
-    if (questionLower.includes('미취업') || questionLower.includes('구직') || 
-        questionLower.includes('취업 기간') || questionLower.includes('구직활동')) {
+    if (hasKeyword(synonyms.미취업) || questionLower.includes('취업 기간') || questionLower.includes('구직활동')) {
       
       const { data: unemploymentData } = await supabase
         .from('성별_미취업기간별_미취업자')
@@ -212,7 +246,7 @@ async function searchRelevantData(supabase: any, question: string) {
     }
 
     // 전공 일치 여부 관련 질문
-    if (questionLower.includes('전공') || questionLower.includes('전공일치') || questionLower.includes('일치 여부') || questionLower.includes('일치여부')) {
+    if (hasKeyword(synonyms.전공) || questionLower.includes('일치 여부') || questionLower.includes('일치여부')) {
       const { data: majorData } = await supabase
         .from('성별_최종학교_전공일치_여부')
         .select('*')
@@ -318,6 +352,13 @@ function buildContext(relevantData: any): string {
     context += "\n=== 전공 일치 여부 ===\n";
     relevantData.majorMatch.forEach((item: any) => {
       context += `- ${item.시점}: 전체 ${item.계}천명, 매우 일치 ${item["매우 일치"]}천명, 그런대로 일치 ${item["그런대로 일치"]}천명, 약간 불일치 ${item["약간 불일치"]}천명, 매우 불일치 ${item["매우 불일치"]}천명\n`;
+    });
+  }
+
+  if (relevantData.industryEmployment) {
+    context += "\n=== 산업별 취업분포 (졸업중퇴 취업자) ===\n";
+    relevantData.industryEmployment.forEach((item: any) => {
+      context += `- ${item.시점}: 산업분야 ${item["산업별(1)"]}, 졸업중퇴 청년층 취업자 ${item["졸업/중퇴 청년층 취업자"]}천명, 전체 취업자 ${item["전체 취업자"]}천명\n`;
     });
   }
 
