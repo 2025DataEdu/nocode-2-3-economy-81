@@ -27,9 +27,18 @@ serve(async (req) => {
 
     console.log('Received question:', question);
 
-    // RAG: 질문과 관련된 데이터 검색
-    const relevantData = await searchRelevantData(supabase, question);
-    console.log('Found relevant data sources:', relevantData.sources);
+    // 1단계: 질문 의미분석
+    const questionAnalysis = analyzeQuestion(question);
+    console.log('Question analysis:', questionAnalysis);
+
+    // 2단계: 모든 통계표 조회 및 답변 가능 여부 판단
+    const comprehensiveData = await searchAllDatasets(supabase);
+    console.log('Total datasets retrieved:', comprehensiveData.sources.length);
+    console.log('Total data points:', comprehensiveData.dataPoints);
+
+    // 3단계: 의미분석 결과를 바탕으로 관련 데이터 필터링
+    const relevantData = filterRelevantData(comprehensiveData, questionAnalysis);
+    console.log('Relevant data sources for question:', relevantData.sources);
 
     // 컨텍스트 구성
     const context = buildContext(relevantData);
@@ -119,9 +128,75 @@ ${context}
   }
 });
 
-// RAG: 질문과 관련된 데이터 검색 함수
-async function searchRelevantData(supabase: any, question: string) {
-  const relevantData = {
+// 1단계: 질문 의미분석 함수
+function analyzeQuestion(question: string) {
+  const questionLower = question.toLowerCase();
+  
+  const analysis = {
+    keywords: [],
+    intent: '',
+    categories: [],
+    timeframe: null,
+    dataRequirements: []
+  };
+
+  // 키워드 추출
+  const keywordPatterns = {
+    employment: ['고용', '취업', '일자리', '직업', '직장'],
+    salary: ['임금', '급여', '월급', '연봉', '소득', '수입'],
+    industry: ['산업', '업종', '분야', '제조업', '서비스업', '건설업', '금융업'],
+    education: ['전공', '학과', '대학', '졸업', '교육'],
+    unemployment: ['실업', '미취업', '구직', '취업준비'],
+    duration: ['기간', '소요', '평균', '시간'],
+    statistics: ['통계', '현황', '분포', '비율', '퍼센트'],
+    comparison: ['비교', '차이', '높은', '낮은', '많은', '적은'],
+    trend: ['변화', '추세', '증가', '감소', '트렌드'],
+    region: ['지역', '서울', '부산', '대구', '인천'],
+    gender: ['남자', '여자', '성별', '남녀'],
+    age: ['나이', '연령', '청년', '20대', '30대']
+  };
+
+  // 키워드 매칭
+  Object.entries(keywordPatterns).forEach(([category, patterns]) => {
+    if (patterns.some(pattern => questionLower.includes(pattern))) {
+      analysis.categories.push(category);
+      analysis.keywords.push(...patterns.filter(p => questionLower.includes(p)));
+    }
+  });
+
+  // 의도 파악
+  if (questionLower.includes('어디') || questionLower.includes('어느')) {
+    analysis.intent = 'location_query';
+  } else if (questionLower.includes('언제') || questionLower.includes('시기')) {
+    analysis.intent = 'time_query';
+  } else if (questionLower.includes('얼마나') || questionLower.includes('몇')) {
+    analysis.intent = 'quantity_query';
+  } else if (questionLower.includes('왜') || questionLower.includes('이유')) {
+    analysis.intent = 'reason_query';
+  } else if (questionLower.includes('어떻게') || questionLower.includes('방법')) {
+    analysis.intent = 'method_query';
+  } else if (questionLower.includes('비교') || questionLower.includes('차이')) {
+    analysis.intent = 'comparison_query';
+  } else if (questionLower.includes('변화') || questionLower.includes('추세')) {
+    analysis.intent = 'trend_query';
+  } else {
+    analysis.intent = 'general_query';
+  }
+
+  // 시간 관련 추출
+  const timePatterns = ['2025', '2024', '2023', '2022', '2021', '최근', '현재', '최신'];
+  timePatterns.forEach(pattern => {
+    if (questionLower.includes(pattern)) {
+      analysis.timeframe = pattern;
+    }
+  });
+
+  return analysis;
+}
+
+// 2단계: 모든 데이터셋 조회 함수
+async function searchAllDatasets(supabase: any) {
+  const allData = {
     sources: [],
     dataPoints: 0,
     employment: null,
@@ -130,13 +205,22 @@ async function searchRelevantData(supabase: any, question: string) {
     employmentDuration: null,
     majorMatch: null,
     industryEmployment: null,
-    allDatasets: null
+    schoolStatus: null,
+    graduationDuration: null,
+    vocationalTraining: null,
+    workExperience: null,
+    firstJobIndustry: null,
+    firstJobOccupation: null,
+    quitReason: null,
+    jobSearchRoute: null,
+    leaveExperience: null,
+    workExperienceType: null,
+    unemploymentActivity: null,
+    jobExamPrep: null,
+    continuousEmployment: null
   };
 
-  // 키워드 기반으로 관련 데이터 검색 (유의어 포함)
-  const questionLower = question.toLowerCase();
-  
-  console.log('Searching for keywords in question:', questionLower);
+  console.log('Fetching all available datasets...');
   
   try {
     // 모든 데이터셋을 병렬로 검색 (21개 데이터셋 모두 활용)
@@ -340,19 +424,102 @@ async function searchRelevantData(supabase: any, question: string) {
       console.log(`${result.name}: ${dataCount} rows`);
       
       if (dataCount > 0) {
-        relevantData[result.key] = result.data;
-        relevantData.sources.push(result.name);
-        relevantData.dataPoints += dataCount;
+        allData[result.key] = result.data;
+        allData.sources.push(result.name);
+        allData.dataPoints += dataCount;
       }
     });
 
-    console.log(`Total data points collected: ${relevantData.dataPoints}`);
-    console.log(`Data sources: ${relevantData.sources.join(', ')}`);
+    console.log(`Total data points collected: ${allData.dataPoints}`);
+    console.log(`Data sources: ${allData.sources.join(', ')}`);
 
   } catch (error) {
-    console.error('Error searching relevant data:', error);
+    console.error('Error searching all data:', error);
   }
 
+  return allData;
+}
+
+// 3단계: 의미분석 결과를 바탕으로 관련 데이터 필터링
+function filterRelevantData(allData: any, questionAnalysis: any) {
+  const relevantData = {
+    sources: [],
+    dataPoints: 0,
+    employment: null,
+    salary: null,
+    unemployment: null,
+    employmentDuration: null,
+    majorMatch: null,
+    industryEmployment: null,
+    schoolStatus: null,
+    graduationDuration: null,
+    vocationalTraining: null,
+    workExperience: null,
+    firstJobIndustry: null,
+    firstJobOccupation: null,
+    quitReason: null,
+    jobSearchRoute: null,
+    leaveExperience: null,
+    workExperienceType: null,
+    unemploymentActivity: null,
+    jobExamPrep: null,
+    continuousEmployment: null
+  };
+
+  // 카테고리별 데이터 매핑
+  const categoryMapping = {
+    employment: ['employment', 'industryEmployment', 'firstJobIndustry', 'firstJobOccupation'],
+    salary: ['salary'],
+    industry: ['industryEmployment', 'firstJobIndustry'],
+    education: ['majorMatch', 'graduationDuration', 'schoolStatus', 'leaveExperience'],
+    unemployment: ['unemployment', 'unemploymentActivity', 'jobExamPrep'],
+    duration: ['employmentDuration', 'graduationDuration', 'continuousEmployment'],
+    statistics: Object.keys(allData).filter(key => !['sources', 'dataPoints'].includes(key)),
+    comparison: Object.keys(allData).filter(key => !['sources', 'dataPoints'].includes(key)),
+    trend: Object.keys(allData).filter(key => !['sources', 'dataPoints'].includes(key))
+  };
+
+  // 질문 분석 결과에 따라 관련 데이터 선택
+  let selectedKeys = new Set();
+
+  // 산업 관련 질문은 특히 우선순위 높게
+  if (questionAnalysis.categories.includes('industry')) {
+    selectedKeys.add('industryEmployment');
+    selectedKeys.add('firstJobIndustry');
+    console.log('Industry-related question detected - prioritizing industry data');
+  }
+
+  // 카테고리별 데이터 추가
+  questionAnalysis.categories.forEach(category => {
+    if (categoryMapping[category]) {
+      categoryMapping[category].forEach(key => selectedKeys.add(key));
+    }
+  });
+
+  // 만약 특정 카테고리를 찾지 못했다면 모든 데이터 포함
+  if (selectedKeys.size === 0) {
+    console.log('No specific categories detected - including all available data');
+    Object.keys(allData).forEach(key => {
+      if (!['sources', 'dataPoints'].includes(key)) {
+        selectedKeys.add(key);
+      }
+    });
+  }
+
+  // 선택된 데이터 복사
+  selectedKeys.forEach(key => {
+    if (allData[key] && allData[key].length > 0) {
+      relevantData[key] = allData[key];
+      // sources에서 해당 데이터셋 이름 찾기
+      const sourceIndex = Object.keys(allData).indexOf(key);
+      if (sourceIndex >= 0 && allData.sources[sourceIndex]) {
+        relevantData.sources.push(allData.sources[sourceIndex]);
+        relevantData.dataPoints += allData[key].length;
+      }
+    }
+  });
+
+  console.log(`Filtered data - Selected ${selectedKeys.size} categories, ${relevantData.dataPoints} data points`);
   return relevantData;
 }
 
