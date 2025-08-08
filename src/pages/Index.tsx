@@ -35,7 +35,7 @@ const Index = () => {
 
   if (employmentLoading || latestStatsLoading || salaryLoading || unemploymentDurationLoading || averageSalaryLoading || genderGraduationLoading || industryLoading) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-gradient-background">
         <Header />
         <div className="container mx-auto px-6 py-8">
           <div className="flex items-center justify-center h-64">
@@ -50,7 +50,7 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-background">
       <Header />
       
       <main className="container mx-auto px-6 py-8">
@@ -58,19 +58,19 @@ const Index = () => {
           <TabsList className="grid w-full grid-cols-3 gap-4 bg-transparent p-0 h-auto">
             <TabsTrigger 
               value="dashboard" 
-              className="bg-card border border-border rounded-lg px-6 py-3 text-sm font-medium shadow-sm hover:shadow-md data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary transition-all duration-200"
+              className="bg-gradient-card border-0 rounded-xl px-6 py-4 text-sm font-medium shadow-purple hover:shadow-large data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-purple transition-all duration-300 backdrop-blur-sm"
             >
               데이터 대시보드
             </TabsTrigger>
             <TabsTrigger 
               value="analysis" 
-              className="bg-card border border-border rounded-lg px-6 py-3 text-sm font-medium shadow-sm hover:shadow-md data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary transition-all duration-200"
+              className="bg-gradient-card border-0 rounded-xl px-6 py-4 text-sm font-medium shadow-purple hover:shadow-large data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-purple transition-all duration-300 backdrop-blur-sm"
             >
               AI 분석 도구
             </TabsTrigger>
             <TabsTrigger 
               value="chatbot" 
-              className="bg-card border border-border rounded-lg px-6 py-3 text-sm font-medium shadow-sm hover:shadow-md data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary transition-all duration-200"
+              className="bg-gradient-card border-0 rounded-xl px-6 py-4 text-sm font-medium shadow-purple hover:shadow-large data-[state=active]:bg-gradient-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-purple transition-all duration-300 backdrop-blur-sm"
             >
               AI 챗봇
             </TabsTrigger>
