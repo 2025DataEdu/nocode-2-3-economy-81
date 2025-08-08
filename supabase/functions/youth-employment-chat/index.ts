@@ -471,7 +471,7 @@ function filterRelevantData(allData: any, questionAnalysis: any) {
   const categoryMapping = {
     employment: ['employment', 'industryEmployment', 'firstJobIndustry', 'firstJobOccupation'],
     salary: ['salary'],
-    industry: ['industryEmployment', 'firstJobIndustry'],
+    industry: ['industryEmployment', 'firstJobIndustry'], // 산업 관련 질문을 위해 강화
     education: ['majorMatch', 'graduationDuration', 'schoolStatus', 'leaveExperience'],
     unemployment: ['unemployment', 'unemploymentActivity', 'jobExamPrep'],
     duration: ['employmentDuration', 'graduationDuration', 'continuousEmployment'],
@@ -483,11 +483,12 @@ function filterRelevantData(allData: any, questionAnalysis: any) {
   // 질문 분석 결과에 따라 관련 데이터 선택
   let selectedKeys = new Set();
 
-  // 산업 관련 질문은 특히 우선순위 높게
-  if (questionAnalysis.categories.includes('industry')) {
+  // 산업 관련 질문은 특히 우선순위 높게 - 강제로 산업 데이터 포함
+  if (questionAnalysis.categories.includes('industry') || 
+      questionAnalysis.keywords.some(k => ['산업', '업종', '분야', '제조업', '서비스업'].includes(k))) {
     selectedKeys.add('industryEmployment');
     selectedKeys.add('firstJobIndustry');
-    console.log('Industry-related question detected - prioritizing industry data');
+    console.log('Industry-related question detected - FORCING industry data inclusion');
   }
 
   // 카테고리별 데이터 추가
@@ -511,16 +512,32 @@ function filterRelevantData(allData: any, questionAnalysis: any) {
   selectedKeys.forEach(key => {
     if (allData[key] && allData[key].length > 0) {
       relevantData[key] = allData[key];
-      // sources에서 해당 데이터셋 이름 찾기
-      const sourceIndex = Object.keys(allData).indexOf(key);
-      if (sourceIndex >= 0 && allData.sources[sourceIndex]) {
-        relevantData.sources.push(allData.sources[sourceIndex]);
+      // sources 배열에서 해당 데이터셋 이름 찾기
+      const resultIndex = [
+        'employment', 'salary', 'unemployment', 'employmentDuration', 'majorMatch', 
+        'industryEmployment', 'schoolStatus', 'graduationDuration', 'vocationalTraining',
+        'workExperience', 'firstJobIndustry', 'firstJobOccupation', 'quitReason',
+        'jobSearchRoute', 'leaveExperience', 'workExperienceType', 'unemploymentActivity',
+        'jobExamPrep', 'continuousEmployment'
+      ].indexOf(key);
+      
+      const sourceNames = [
+        '연령별 경제활동상태', '첫 일자리 월평균임금', '미취업 기간별 분포', '첫 취업 소요기간', 
+        '전공 일치 여부', '★산업별 취업분포★', '수학여부', '대학졸업소요기간', '직업교육훈련경험',
+        '취업경험유무', '첫일자리산업', '첫일자리직업', '퇴직사유', '취업경로', '휴학경험', 
+        '직장체험형태', '미취업활동', '취업시험준비', '근속기간'
+      ];
+      
+      if (resultIndex >= 0 && sourceNames[resultIndex]) {
+        relevantData.sources.push(sourceNames[resultIndex]);
         relevantData.dataPoints += allData[key].length;
       }
     }
   });
 
   console.log(`Filtered data - Selected ${selectedKeys.size} categories, ${relevantData.dataPoints} data points`);
+  console.log(`Selected categories: ${Array.from(selectedKeys).join(', ')}`);
+  console.log(`Data sources included: ${relevantData.sources.join(', ')}`);
   return relevantData;
 }
 
