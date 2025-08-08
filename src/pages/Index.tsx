@@ -55,22 +55,22 @@ const Index = () => {
       
       <main className="container mx-auto px-6 py-8">
         <Tabs defaultValue="dashboard" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3 bg-muted/50 p-2 rounded-lg border shadow-sm">
+          <TabsList className="grid w-full grid-cols-3 gap-4 bg-transparent p-0 h-auto">
             <TabsTrigger 
               value="dashboard" 
-              className="text-sm font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm transition-all duration-200 rounded-md"
+              className="bg-card border border-border rounded-lg px-6 py-3 text-sm font-medium shadow-sm hover:shadow-md data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary transition-all duration-200"
             >
               데이터 대시보드
             </TabsTrigger>
             <TabsTrigger 
               value="analysis" 
-              className="text-sm font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm transition-all duration-200 rounded-md"
+              className="bg-card border border-border rounded-lg px-6 py-3 text-sm font-medium shadow-sm hover:shadow-md data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary transition-all duration-200"
             >
               AI 분석 도구
             </TabsTrigger>
             <TabsTrigger 
               value="chatbot" 
-              className="text-sm font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm transition-all duration-200 rounded-md"
+              className="bg-card border border-border rounded-lg px-6 py-3 text-sm font-medium shadow-sm hover:shadow-md data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary transition-all duration-200"
             >
               AI 챗봇
             </TabsTrigger>
