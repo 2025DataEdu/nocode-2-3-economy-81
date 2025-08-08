@@ -23,7 +23,7 @@ const StatsCard = ({ title, value, change, changeType = "neutral", icon: Icon, d
   };
 
   return (
-    <Card className="p-6 bg-card border border-border shadow-soft hover:shadow-medium hover:bg-primary/10 transition-all duration-300">
+    <Card className="p-6 bg-card border border-border shadow-soft hover:shadow-medium hover:bg-primary/20 hover:scale-105 transition-all duration-300 cursor-pointer">
       <div className="flex items-center justify-between">
         <div className="space-y-2">
           <p className="text-sm font-medium text-muted-foreground">{title}</p>
