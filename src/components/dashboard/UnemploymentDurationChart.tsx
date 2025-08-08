@@ -23,12 +23,12 @@ const UnemploymentDurationChart = ({ data, period }: UnemploymentDurationChartPr
     "hsl(142 76% 50%)"
   ];
 
-  // 마우스 오버 이벤트 핸들러
-  const onPieEnter = (data: any, index: number) => {
+  // 마우스 오버 이벤트 핸들러 (Cell 단위)
+  const onCellMouseEnter = (index: number) => {
     setHoveredIndex(index);
   };
 
-  const onPieLeave = () => {
+  const onCellMouseLeave = () => {
     setHoveredIndex(null);
   };
 
@@ -91,24 +91,26 @@ const UnemploymentDurationChart = ({ data, period }: UnemploymentDurationChartPr
               cy="50%"
               labelLine={false}
               label={renderCustomizedLabel}
-              outerRadius={hoveredIndex !== null ? 125 : 120}
+              outerRadius={120}
               fill="#8884d8"
               dataKey="count"
               nameKey="duration"
               startAngle={90}
               endAngle={-270}
-              onMouseEnter={onPieEnter}
-              onMouseLeave={onPieLeave}
             >
               {data.map((entry, index) => (
                 <Cell 
                   key={`cell-${index}`} 
                   fill={colors[index % colors.length]}
+                  stroke={hoveredIndex === index ? "#ffffff" : "none"}
+                  strokeWidth={hoveredIndex === index ? 3 : 0}
                   style={{
-                    filter: hoveredIndex === index ? 'brightness(1.2) drop-shadow(0 0 8px rgba(0,0,0,0.3))' : 'brightness(1)',
-                    transition: 'all 0.2s ease-in-out',
+                    filter: hoveredIndex === index ? 'brightness(1.3) drop-shadow(0 4px 12px rgba(0,0,0,0.4))' : 'brightness(1)',
+                    transition: 'all 0.15s ease-out',
                     cursor: 'pointer'
                   }}
+                  onMouseEnter={() => onCellMouseEnter(index)}
+                  onMouseLeave={onCellMouseLeave}
                 />
               ))}
             </Pie>
