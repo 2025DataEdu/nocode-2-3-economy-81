@@ -449,7 +449,7 @@ async function searchAllDatasets(supabase: any) {
   return allData;
 }
 
-// 3단계: 의미분석 결과를 바탕으로 관련 데이터 필터링
+// 3단계: 의미분석 결과를 바탕으로 관련 데이터 필터링 - 개선된 매칭 로직
 function filterRelevantData(allData: any, questionAnalysis: any) {
   const relevantData = {
     sources: [],
@@ -475,45 +475,122 @@ function filterRelevantData(allData: any, questionAnalysis: any) {
     continuousEmployment: null
   };
 
-  // 카테고리별 데이터 매핑
-  const categoryMapping = {
-    employment: ['employment', 'industryEmployment', 'firstJobIndustry', 'firstJobOccupation'],
-    salary: ['salary'],
-    industry: ['industryEmployment', 'firstJobIndustry'], // 산업 관련 질문을 위해 강화
-    education: ['majorMatch', 'graduationDuration', 'schoolStatus', 'leaveExperience'],
-    unemployment: ['unemployment', 'unemploymentActivity', 'jobExamPrep'],
-    duration: ['employmentDuration', 'graduationDuration', 'continuousEmployment'],
-    statistics: Object.keys(allData).filter(key => !['sources', 'dataPoints'].includes(key)),
-    comparison: Object.keys(allData).filter(key => !['sources', 'dataPoints'].includes(key)),
-    trend: Object.keys(allData).filter(key => !['sources', 'dataPoints'].includes(key))
+  // 키워드 기반 스마트 매칭 로직 - 모든 가능한 질문에 대응
+  const keywordToDataMapping = {
+    // 기본 고용 관련
+    '고용': ['employment', 'industryEmployment'],
+    '취업': ['employment', 'employmentDuration', 'firstJobIndustry', 'firstJobOccupation', 'workExperience'],
+    '일자리': ['employment', 'industryEmployment', 'firstJobIndustry', 'firstJobOccupation', 'quitReason'],
+    '직업': ['firstJobOccupation', 'vocationalTraining', 'workExperience'],
+    '직장': ['employment', 'quitReason', 'continuousEmployment', 'workExperienceType'],
+    
+    // 산업/업종 관련
+    '산업': ['industryEmployment', 'firstJobIndustry'],
+    '업종': ['industryEmployment', 'firstJobIndustry'],
+    '분야': ['industryEmployment', 'firstJobIndustry', 'majorMatch'],
+    '제조업': ['industryEmployment', 'firstJobIndustry'],
+    '서비스업': ['industryEmployment', 'firstJobIndustry'],
+    '건설업': ['industryEmployment', 'firstJobIndustry'],
+    
+    // 임금/급여 관련
+    '임금': ['salary'],
+    '급여': ['salary'],
+    '월급': ['salary'],
+    '연봉': ['salary'],
+    '소득': ['salary'],
+    '수입': ['salary'],
+    '300만원': ['salary'],
+    '고임금': ['salary'],
+    
+    // 교육/전공 관련
+    '전공': ['majorMatch', 'graduationDuration'],
+    '학과': ['majorMatch'],
+    '대학': ['graduationDuration', 'leaveExperience'],
+    '졸업': ['graduationDuration', 'workExperience'],
+    '교육': ['vocationalTraining', 'majorMatch'],
+    '훈련': ['vocationalTraining'],
+    '직업교육': ['vocationalTraining'],
+    '직업훈련': ['vocationalTraining'],
+    
+    // 실업/미취업 관련
+    '실업': ['unemployment', 'unemploymentActivity'],
+    '미취업': ['unemployment', 'unemploymentActivity', 'jobExamPrep'],
+    '구직': ['unemployment', 'jobSearchRoute'],
+    '취업준비': ['jobExamPrep', 'unemploymentActivity'],
+    
+    // 기간/시간 관련
+    '기간': ['employmentDuration', 'graduationDuration', 'continuousEmployment', 'unemployment'],
+    '소요': ['employmentDuration', 'graduationDuration'],
+    '평균': ['employmentDuration', 'graduationDuration', 'continuousEmployment', 'salary'],
+    '시간': ['employmentDuration'],
+    
+    // 퇴직/이직 관련
+    '그만': ['quitReason'],
+    '퇴직': ['quitReason'],
+    '이직': ['quitReason'],
+    '사유': ['quitReason'],
+    '이유': ['quitReason'],
+    '왜': ['quitReason'],
+    
+    // 경로/방법 관련
+    '경로': ['jobSearchRoute'],
+    '방법': ['jobSearchRoute'],
+    '어떻게': ['jobSearchRoute'],
+    
+    // 체험/경험 관련
+    '체험': ['workExperienceType'],
+    '경험': ['workExperience', 'vocationalTraining', 'leaveExperience'],
+    '인턴': ['workExperienceType'],
+    
+    // 활동 관련
+    '활동': ['unemploymentActivity'],
+    '시험': ['jobExamPrep'],
+    '준비': ['jobExamPrep', 'unemploymentActivity'],
+    
+    // 휴학 관련
+    '휴학': ['leaveExperience'],
+    
+    // 근속 관련
+    '근속': ['continuousEmployment'],
+    '계속': ['continuousEmployment']
   };
 
-  // 질문 분석 결과에 따라 관련 데이터 선택
+  // 질문에서 키워드 추출하여 관련 데이터 자동 매칭
+  const questionLower = questionAnalysis.keywords.join(' ').toLowerCase();
   let selectedKeys = new Set();
 
-  // 산업 관련 질문은 특히 우선순위 높게 - 강제로 산업 데이터 포함
-  if (questionAnalysis.categories.includes('industry') || 
-      questionAnalysis.keywords.some(k => ['산업', '업종', '분야', '제조업', '서비스업'].includes(k))) {
-    selectedKeys.add('industryEmployment');
-    selectedKeys.add('firstJobIndustry');
-    console.log('Industry-related question detected - FORCING industry data inclusion');
-  }
-
-  // 카테고리별 데이터 추가
-  questionAnalysis.categories.forEach(category => {
-    if (categoryMapping[category]) {
-      categoryMapping[category].forEach(key => selectedKeys.add(key));
+  // 키워드 기반 매칭
+  Object.entries(keywordToDataMapping).forEach(([keyword, dataKeys]) => {
+    if (questionLower.includes(keyword) || questionAnalysis.keywords.some(k => k.includes(keyword))) {
+      dataKeys.forEach(key => selectedKeys.add(key));
+      console.log(`Keyword "${keyword}" matched - adding data: ${dataKeys.join(', ')}`);
     }
   });
 
-  // 만약 특정 카테고리를 찾지 못했다면 모든 데이터 포함
+  // 특별 처리: 특정 의도에 따른 추가 데이터 포함
+  if (questionAnalysis.intent === 'reason_query') {
+    selectedKeys.add('quitReason');
+    selectedKeys.add('unemploymentActivity');
+    console.log('Reason query detected - adding quit reason and unemployment activity data');
+  }
+  
+  if (questionAnalysis.intent === 'method_query') {
+    selectedKeys.add('jobSearchRoute');
+    selectedKeys.add('vocationalTraining');
+    console.log('Method query detected - adding job search route and training data');
+  }
+
+  // 여전히 매칭되지 않으면 모든 데이터 포함 (포괄적 답변)
   if (selectedKeys.size === 0) {
-    console.log('No specific categories detected - including all available data');
+    console.log('No specific keywords matched - including ALL available data for comprehensive analysis');
     Object.keys(allData).forEach(key => {
-      if (!['sources', 'dataPoints'].includes(key)) {
+      if (!['sources', 'dataPoints'].includes(key) && allData[key]) {
         selectedKeys.add(key);
       }
     });
+  } else {
+    // 기본적으로 고용 상태는 항상 포함 (맥락 제공)
+    selectedKeys.add('employment');
   }
 
   // 선택된 데이터 복사
@@ -628,6 +705,54 @@ function buildContext(relevantData: any): string {
     context += "\n=== 직업교육훈련 경험 ===\n";
     relevantData.vocationalTraining.forEach((item: any) => {
       context += `- ${item.시점}: 청년층인구 전체 ${item["청년층 인구 전체"]}천명, 교육훈련경험있음 ${item["교육훈련 경험있음"]}천명, 교육훈련경험없음 ${item["교육훈련 경험없음"]}천명\n`;
+    });
+  }
+
+  // 퇴직사유 데이터 추가
+  if (relevantData.quitReason) {
+    context += "\n=== 첫일자리를 그만둔 사유 ===\n";
+    relevantData.quitReason.forEach((item: any) => {
+      context += `- ${item.시점}: 전체 이직경험자 ${item["이직 경험자 전체"]}천명, 근로여건불만족 ${item["근로여건 불만족(보수 근로시간 등)"]}천명, 임시계절적일완료 ${item["임시적 계절적인 일의 완료 계약기간 끝남"]}천명, 개인가족적이유 ${item["개인/가족적이유(건강육아결혼등)"]}천명, 전공불일치 ${item["전공 지식 기술 적성등이 맞지않아서"]}천명, 전망없음 ${item["전망이 없어서"]}천명\n`;
+    });
+  }
+
+  // 취업경로 데이터 추가
+  if (relevantData.jobSearchRoute) {
+    context += "\n=== 취업경로 ===\n";
+    relevantData.jobSearchRoute.forEach((item: any) => {
+      context += `- ${item.시점}: 취업경험자 전체 ${item["졸업/중퇴 후 취업 유경험자"]}천명, 공개시험 ${item["공개시험"]}천명, 신문잡지인터넷응모 ${item["신문 잡지 인터넷 등 응모"]}천명, 가족친지소개 ${item["가족 친지소개 (추천)"]}천명, 학교추천 ${item["학교(학원) 선생님 추천"]}천명\n`;
+    });
+  }
+
+  // 미취업활동 데이터 추가
+  if (relevantData.unemploymentActivity) {
+    context += "\n=== 미취업기간 중 주요활동 ===\n";
+    relevantData.unemploymentActivity.forEach((item: any) => {
+      context += `- ${item.시점}: 전체 ${item["계"]}천명, 구직활동 ${item["구직활동"]}천명, 직업교육훈련 ${item["직업교육훈련"]}천명, 취업시험준비 ${item["취업관련시험준비"]}천명, 여가시간 ${item["여가시간"]}천명, 그냥시간보냄 ${item["그냥시간보냄"]}천명\n`;
+    });
+  }
+
+  // 취업시험준비 데이터 추가
+  if (relevantData.jobExamPrep) {
+    context += "\n=== 취업시험 준비분야 ===\n";
+    relevantData.jobExamPrep.forEach((item: any) => {
+      context += `- ${item.시점}: 비경제활동인구 전체 ${item["청년층 비경제활동인구 전체"]}천명, 시험준비함 ${item["취업시험 준비하였음"]}천명, 시험준비안함 ${item["취업시험 준비하지 않았음"]}천명, 일반직공무원 ${item["- 일반직공무원"]}천명, 일반기업체 ${item["- 일반기업체"]}천명\n`;
+    });
+  }
+
+  // 근속기간 데이터 추가
+  if (relevantData.continuousEmployment) {
+    context += "\n=== 첫직장 근속기간 ===\n";
+    relevantData.continuousEmployment.forEach((item: any) => {
+      context += `- ${item.시점}: 취업경험자 전체 ${item["졸업ㆍ중퇴 후 취업 유경험자 전체"]}천명, 평균근속기간 ${item["평균 근속기간 (개월)"]}개월, 첫일자리현직장여부 ${item["첫일자리가 현직장인지 여부"]}\n`;
+    });
+  }
+
+  // 직장체험 데이터 추가
+  if (relevantData.workExperienceType) {
+    context += "\n=== 직장체험 형태 ===\n";
+    relevantData.workExperienceType.forEach((item: any) => {
+      context += `- ${item.시점}: 체험경험자 전체 ${item["직장체험 경험자 전체"]}천명, 정부지원프로그램 ${item["정부지원 직장체험프로그램 참여"]}천명, 기업인턴 ${item["기업인턴"]}천명, 학교현장실습 ${item["학교의 현장실습 참여"]}천명\n`;
     });
   }
 
