@@ -17,148 +17,148 @@ interface DataInfo {
 
 const dataList: DataInfo[] = [
   {
-    name: "고용 현황 데이터",
+    name: "연령별 경제활동상태",
     description: "청년층 고용률 및 실업률 월별 통계",
     tables: 1,
     period: "2004.05~현재",
     downloadUrl: "#"
   },
   {
-    name: "임금 분포 데이터", 
+    name: "성별 첫 일자리 월평균임금", 
     description: "청년층 임금 구간별 분포 현황",
     tables: 1,
-    period: "2004.05~현재",
+    period: "2017.05~현재",
     downloadUrl: "#"
   },
   {
-    name: "실업 기간 데이터",
+    name: "성별 미취업기간별 미취업자",
     description: "청년층 실업 지속 기간별 통계",
     tables: 1,
-    period: "2004.05~현재", 
+    period: "2007.05~현재", 
     downloadUrl: "#"
   },
   {
-    name: "졸업소요기간 데이터",
+    name: "성 및 학제별 대학졸업소요기간",
     description: "성별 대학 졸업소요기간 통계",
     tables: 1,
-    period: "2004.05~현재",
+    period: "2007.05~현재",
     downloadUrl: "#"
   },
   {
-    name: "경제활동인구조사 취업자 데이터",
-    description: "경제활동상태별 취업자 통계",
+    name: "성별 미취업기간활동별 미취업자",
+    description: "미취업 중 활동 유형별 통계",
+    tables: 1,
+    period: "2008.05~현재",
+    downloadUrl: "#"
+  },
+  {
+    name: "성별 직업교육 훈련 경험 유무 및 시기",
+    description: "직업교육 훈련 경험 현황",
     tables: 1,
     period: "2004.05~현재",
     downloadUrl: "#"
   },
   {
-    name: "경제활동인구조사 실업자 데이터",
-    description: "실업자 현황 및 구직활동 통계",
+    name: "성별 직업교육 훈련을 받은 직업훈련유경험자",
+    description: "직업훈련 기관별 경험자 통계",
     tables: 1,
     period: "2004.05~현재",
     downloadUrl: "#"
   },
   {
-    name: "경제활동인구조사 비경제활동인구 데이터",
-    description: "비경제활동인구 현황 통계",
+    name: "성별 직장체험유무 및 기간",
+    description: "직장체험 경험 및 기간별 통계",
     tables: 1,
     period: "2004.05~현재",
     downloadUrl: "#"
   },
   {
-    name: "임금근로자 고용형태별 데이터",
-    description: "정규직, 비정규직 고용형태별 통계",
+    name: "성별 직장체험형태 직장체험경험자",
+    description: "직장체험 형태별 경험자 통계",
     tables: 1,
     period: "2004.05~현재",
     downloadUrl: "#"
   },
   {
-    name: "산업별 취업자 데이터",
-    description: "주요 산업분야별 취업자 현황",
+    name: "성별 첫 취업 소요기간 및 평균소요기간",
+    description: "첫 취업까지 소요 기간 통계",
     tables: 1,
     period: "2004.05~현재",
     downloadUrl: "#"
   },
   {
-    name: "직업별 취업자 데이터",
-    description: "주요 직업분야별 취업자 현황",
+    name: "성별 첫일자리 산업 졸업 중퇴 취업유경험자",
+    description: "첫 일자리 산업분야별 분포",
+    tables: 1,
+    period: "2013.05~현재",
+    downloadUrl: "#"
+  },
+  {
+    name: "성별 첫일자리 직업 졸업 중퇴취업유경험자",
+    description: "첫 일자리 직업분야별 분포",
+    tables: 1,
+    period: "2013.05~현재",
+    downloadUrl: "#"
+  },
+  {
+    name: "성별 첫일자리를 그만둔 사유",
+    description: "첫 일자리 퇴사 사유별 통계",
     tables: 1,
     period: "2004.05~현재",
     downloadUrl: "#"
   },
   {
-    name: "교육정도별 경제활동 데이터",
-    description: "학력수준별 경제활동 현황",
+    name: "성별 최종학교 전공일치 여부",
+    description: "최종학교 전공과 직무 일치도",
     tables: 1,
     period: "2004.05~현재",
     downloadUrl: "#"
   },
   {
-    name: "혼인상태별 경제활동 데이터",
-    description: "혼인상태별 경제활동 참여 현황",
+    name: "성별 취업경험유무 및 횟수 졸업 중퇴 인구",
+    description: "취업 경험 횟수별 통계",
     tables: 1,
     period: "2004.05~현재",
     downloadUrl: "#"
   },
   {
-    name: "지역별 고용 데이터",
-    description: "시도별 고용률 및 실업률 통계",
+    name: "성별 취업시험준비유무 및 준비분야 비경제활",
+    description: "취업시험 준비 분야별 통계",
+    tables: 1,
+    period: "2006.05~현재",
+    downloadUrl: "#"
+  },
+  {
+    name: "성별 학력별 취업경로 졸업 중퇴 취업자",
+    description: "학력별 취업 경로 분석",
     tables: 1,
     period: "2004.05~현재",
     downloadUrl: "#"
   },
   {
-    name: "청년 창업 데이터",
-    description: "청년층 창업 현황 및 지원 통계",
+    name: "성별 휴학경험유무 평균휴학기간 대졸자",
+    description: "대졸자 휴학 경험 및 기간",
+    tables: 1,
+    period: "2007.05~현재",
+    downloadUrl: "#"
+  },
+  {
+    name: "연령별 수학여부",
+    description: "연령별 재학/졸업 상태 통계",
     tables: 1,
     period: "2004.05~현재",
     downloadUrl: "#"
   },
   {
-    name: "청년 직업훈련 데이터",
-    description: "청년층 직업훈련 참여 현황",
+    name: "졸업 중퇴 취업자의 산업별 취업분포 11차",
+    description: "산업분류별 취업자 분포",
     tables: 1,
-    period: "2004.05~현재",
+    period: "2013.05~현재",
     downloadUrl: "#"
   },
   {
-    name: "청년 구직활동 데이터",
-    description: "청년층 구직활동 방법 및 기간",
-    tables: 1,
-    period: "2004.05~현재",
-    downloadUrl: "#"
-  },
-  {
-    name: "청년 근로조건 데이터",
-    description: "청년층 근로시간 및 근로조건 통계",
-    tables: 1,
-    period: "2004.05~현재",
-    downloadUrl: "#"
-  },
-  {
-    name: "청년 사회보험 가입 데이터",
-    description: "청년층 4대보험 가입 현황",
-    tables: 1,
-    period: "2004.05~현재",
-    downloadUrl: "#"
-  },
-  {
-    name: "청년 첫 일자리 데이터",
-    description: "첫 일자리 진입 및 유지 통계",
-    tables: 1,
-    period: "2004.05~현재",
-    downloadUrl: "#"
-  },
-  {
-    name: "청년 이직 데이터",
-    description: "청년층 이직 사유 및 주기 통계",
-    tables: 1,
-    period: "2004.05~현재",
-    downloadUrl: "#"
-  },
-  {
-    name: "청년 진로 및 경력개발 데이터",
-    description: "진로설정 및 경력개발 활동 현황",
+    name: "첫직장 근속기간",
+    description: "첫 직장 평균 근속기간 통계",
     tables: 1,
     period: "2004.05~현재",
     downloadUrl: "#"
