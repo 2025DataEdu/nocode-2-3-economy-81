@@ -153,21 +153,30 @@ async function searchRelevantData(supabase: any, question: string) {
   }
   
   try {
+    console.log('Searching for keywords in question:', questionLower);
+    
     // 산업별 취업분포 관련 질문 (가장 먼저 체크)
-    if (hasKeyword(synonyms.취업분포) || questionLower.includes('산업') || 
-        questionLower.includes('업종') || questionLower.includes('분포')) {
+    if (questionLower.includes('취업분포') || questionLower.includes('산업별 취업') || 
+        questionLower.includes('업종별 취업') || questionLower.includes('직업분포') || 
+        questionLower.includes('일자리 분포') || questionLower.includes('고용분포') ||
+        questionLower.includes('산업') || questionLower.includes('업종') || questionLower.includes('분포')) {
       
-      const { data: industryData } = await supabase
+      console.log('Searching for industry employment data...');
+      
+      const { data: industryData, error: industryError } = await supabase
         .from('졸업_중퇴_취업자의_산업별_취업분포_11차')
         .select('*')
         .eq('연령구분(1)', '20~34세')
         .order('시점', { ascending: false })
         .limit(20);
       
+      console.log('Industry data result:', industryData?.length || 0, 'rows, error:', industryError);
+      
       if (industryData?.length > 0) {
         relevantData.industryEmployment = industryData;
         relevantData.sources.push('졸업중퇴 취업자의 산업별 취업분포');
         relevantData.dataPoints += industryData.length;
+        console.log('Added industry employment data to relevant data');
       }
     }
 
