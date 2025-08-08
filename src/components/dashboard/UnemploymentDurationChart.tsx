@@ -83,52 +83,56 @@ const UnemploymentDurationChart = ({ data, period }: UnemploymentDurationChartPr
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="flex items-center">
-          <ResponsiveContainer width="100%" height={350}>
-            <PieChart>
-              <Pie
-                data={data}
-                cx="65%"
-                cy="50%"
-                labelLine={false}
-                label={renderCustomizedLabel}
-                outerRadius={120}
-                fill="#8884d8"
-                dataKey="count"
-                nameKey="duration"
-                startAngle={90}
-                endAngle={-270}
-              >
-                {data.map((entry, index) => (
-                  <Cell 
-                    key={`cell-${index}`} 
-                    fill={colors[index % colors.length]}
-                    stroke={hoveredIndex === index ? "#ffffff" : "none"}
-                    strokeWidth={hoveredIndex === index ? 3 : 0}
-                    style={{
-                      filter: hoveredIndex === index ? 'brightness(1.3) drop-shadow(0 4px 12px rgba(0,0,0,0.4))' : 'brightness(1)',
-                      transition: 'all 0.15s ease-out',
-                      cursor: 'pointer'
-                    }}
-                    onMouseEnter={() => onCellMouseEnter(index)}
-                    onMouseLeave={onCellMouseLeave}
+        <div className="flex items-center gap-4">
+          <div className="w-1/4 min-w-[180px]">
+            <div className="space-y-2">
+              {data.map((entry, index) => (
+                <div key={`legend-${index}`} className="flex items-center gap-2 text-sm">
+                  <div 
+                    className="w-3 h-3 rounded-full" 
+                    style={{ backgroundColor: colors[index % colors.length] }}
                   />
-                ))}
-              </Pie>
-              <Tooltip content={<CustomTooltip />} />
-              <Legend 
-                verticalAlign="middle"
-                align="left"
-                layout="vertical"
-                wrapperStyle={{ 
-                  paddingLeft: '0px',
-                  paddingRight: '20px',
-                  lineHeight: '28px'
-                }}
-                iconType="circle"
-              />
-            </PieChart>
-          </ResponsiveContainer>
+                  <span className="text-foreground truncate">{entry.duration}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="flex-1">
+            <ResponsiveContainer width="100%" height={350}>
+              <PieChart>
+                <Pie
+                  data={data}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={renderCustomizedLabel}
+                  outerRadius={110}
+                  fill="#8884d8"
+                  dataKey="count"
+                  nameKey="duration"
+                  startAngle={90}
+                  endAngle={-270}
+                >
+                  {data.map((entry, index) => (
+                    <Cell 
+                      key={`cell-${index}`} 
+                      fill={colors[index % colors.length]}
+                      stroke={hoveredIndex === index ? "#ffffff" : "none"}
+                      strokeWidth={hoveredIndex === index ? 3 : 0}
+                      style={{
+                        filter: hoveredIndex === index ? 'brightness(1.3) drop-shadow(0 4px 12px rgba(0,0,0,0.4))' : 'brightness(1)',
+                        transition: 'all 0.15s ease-out',
+                        cursor: 'pointer'
+                      }}
+                      onMouseEnter={() => onCellMouseEnter(index)}
+                      onMouseLeave={onCellMouseLeave}
+                    />
+                  ))}
+                </Pie>
+                <Tooltip content={<CustomTooltip />} />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
         </div>
       </CardContent>
     </Card>
