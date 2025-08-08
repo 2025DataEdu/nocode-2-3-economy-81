@@ -4,8 +4,9 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
-import { MessageCircle, Send, Bot, User, Lightbulb, Database } from "lucide-react";
+import { MessageCircle, Send, Bot, User, Lightbulb, Database, Download } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import jsPDF from 'jspdf';
 import { useToast } from "@/components/ui/use-toast";
 
 interface Message {
@@ -140,6 +141,78 @@ const YouthEmploymentChatbot = () => {
     });
   };
 
+  const downloadChatHistory = () => {
+    const pdf = new jsPDF();
+    
+    // PDF 설정 - 한글 폰트 문제로 기본 폰트 사용하고 로마자로 제목 설정
+    pdf.setFontSize(16);
+    pdf.text('Youth Employment Chat History', 20, 20);
+    
+    pdf.setFontSize(12);
+    const currentDate = new Date().toLocaleDateString('ko-KR');
+    pdf.text(`Export Date: ${currentDate}`, 20, 30);
+    
+    let yPosition = 50;
+    const pageHeight = pdf.internal.pageSize.height;
+    const marginBottom = 20;
+    
+    messages.forEach((message, index) => {
+      // 페이지 끝에 가까우면 새 페이지 생성
+      if (yPosition > pageHeight - marginBottom) {
+        pdf.addPage();
+        yPosition = 20;
+      }
+      
+      // 메시지 타입 표시
+      pdf.setFontSize(10);
+      const sender = message.type === 'user' ? 'User' : 'AI Bot';
+      const timestamp = message.timestamp.toLocaleString('ko-KR');
+      pdf.text(`[${sender}] ${timestamp}`, 20, yPosition);
+      yPosition += 7;
+      
+      // 메시지 내용 (한글 텍스트를 ASCII로 변환하지 않고 그대로 사용)
+      pdf.setFontSize(9);
+      const content = message.content;
+      
+      // 텍스트를 여러 줄로 분할 (한 줄당 최대 글자 수 제한)
+      const maxLineWidth = 170;
+      const lines = pdf.splitTextToSize(content, maxLineWidth);
+      
+      lines.forEach((line: string) => {
+        if (yPosition > pageHeight - marginBottom) {
+          pdf.addPage();
+          yPosition = 20;
+        }
+        pdf.text(line, 25, yPosition);
+        yPosition += 5;
+      });
+      
+      // 데이터 출처가 있는 경우 추가
+      if (message.sources && message.sources.length > 0) {
+        yPosition += 3;
+        pdf.setFontSize(8);
+        pdf.text('Data Sources: ' + message.sources.join(', '), 25, yPosition);
+        yPosition += 5;
+        
+        if (message.dataPoints) {
+          pdf.text(`Data Points Used: ${message.dataPoints}`, 25, yPosition);
+          yPosition += 5;
+        }
+      }
+      
+      yPosition += 10; // 메시지 간 간격
+    });
+    
+    // PDF 다운로드
+    const filename = `youth-employment-chat-${new Date().toISOString().split('T')[0]}.pdf`;
+    pdf.save(filename);
+    
+    toast({
+      title: "다운로드 완료",
+      description: "채팅 기록이 PDF로 저장되었습니다.",
+    });
+  };
+
   return (
     <div className="space-y-6">
       {/* 헤더 */}
@@ -186,7 +259,19 @@ const YouthEmploymentChatbot = () => {
       {/* 채팅 영역 */}
       <Card className="h-[600px] flex flex-col">
         <CardHeader className="flex-shrink-0 pb-2">
-          <CardTitle className="text-lg">대화</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-lg">대화</CardTitle>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={downloadChatHistory}
+              disabled={messages.length <= 1}
+              className="flex items-center gap-2"
+            >
+              <Download className="w-4 h-4" />
+              PDF 다운로드
+            </Button>
+          </div>
         </CardHeader>
         <CardContent className="flex-1 flex flex-col p-0 overflow-hidden">
           <ScrollArea ref={scrollAreaRef} className="flex-1 p-4">
