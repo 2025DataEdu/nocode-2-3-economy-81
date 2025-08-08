@@ -46,8 +46,8 @@ const YouthIndustryChart = ({ data, totalEmployed, period }: YouthIndustryChartP
       .substring(0, 12);
   };
 
-  // 데이터를 막대차트용으로 변환 (이미 정렬되어 있음)
-  const chartData = data.map((item, index) => ({
+  // 데이터를 막대차트용으로 변환 (가로차트를 위해 순서 뒤집기)
+  const chartData = data.slice().reverse().map((item, index) => ({
     name: shortenIndustryName(item.industry),
     fullName: item.industry,
     value: item.employed,
@@ -87,33 +87,40 @@ const YouthIndustryChart = ({ data, totalEmployed, period }: YouthIndustryChartP
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <ResponsiveContainer width="100%" height={600}>
+        <ResponsiveContainer width="100%" height={480}>
           <BarChart
             layout="horizontal"
             data={chartData}
             margin={{
-              top: 20,
-              right: 40,
-              left: 120,
-              bottom: 20,
+              top: 10,
+              right: 30,
+              left: 100,
+              bottom: 10,
             }}
           >
             <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
             <XAxis 
               type="number"
-              fontSize={11}
+              fontSize={10}
               className="text-muted-foreground"
-              tickFormatter={(value) => `${value}천명`}
+              tickFormatter={(value) => `${value}`}
+              domain={[0, 'dataMax + 50']}
             />
             <YAxis 
               type="category"
               dataKey="name" 
-              fontSize={11}
+              fontSize={10}
               className="text-muted-foreground"
-              width={110}
+              width={90}
+              axisLine={false}
+              tickLine={false}
             />
             <Tooltip content={<CustomTooltip />} />
-            <Bar dataKey="value" radius={[0, 4, 4, 0]}>
+            <Bar 
+              dataKey="value" 
+              radius={[0, 4, 4, 0]}
+              fill="hsl(var(--primary))"
+            >
               {chartData.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={entry.color} />
               ))}
