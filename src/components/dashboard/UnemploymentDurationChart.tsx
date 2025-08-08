@@ -91,7 +91,7 @@ const UnemploymentDurationChart = ({ data, period }: UnemploymentDurationChartPr
               cy="50%"
               labelLine={false}
               label={renderCustomizedLabel}
-              outerRadius={120}
+              outerRadius={hoveredIndex !== null ? 125 : 120}
               fill="#8884d8"
               dataKey="count"
               nameKey="duration"
@@ -105,9 +105,7 @@ const UnemploymentDurationChart = ({ data, period }: UnemploymentDurationChartPr
                   key={`cell-${index}`} 
                   fill={colors[index % colors.length]}
                   style={{
-                    filter: hoveredIndex === index ? 'brightness(1.1)' : 'brightness(1)',
-                    transform: hoveredIndex === index ? 'scale(1.05)' : 'scale(1)',
-                    transformOrigin: 'center',
+                    filter: hoveredIndex === index ? 'brightness(1.2) drop-shadow(0 0 8px rgba(0,0,0,0.3))' : 'brightness(1)',
                     transition: 'all 0.2s ease-in-out',
                     cursor: 'pointer'
                   }}
