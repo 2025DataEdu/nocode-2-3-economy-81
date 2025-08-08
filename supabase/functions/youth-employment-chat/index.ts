@@ -127,7 +127,8 @@ async function searchRelevantData(supabase: any, question: string) {
     employment: null,
     salary: null,
     unemployment: null,
-    employmentDuration: null
+    employmentDuration: null,
+    majorMatch: null
   };
 
   // 키워드 기반으로 관련 데이터 검색
@@ -210,11 +211,28 @@ async function searchRelevantData(supabase: any, question: string) {
       }
     }
 
+    // 전공 일치 여부 관련 질문
+    if (questionLower.includes('전공') || questionLower.includes('전공일치') || questionLower.includes('일치 여부') || questionLower.includes('일치여부')) {
+      const { data: majorData } = await supabase
+        .from('성별_최종학교_전공일치_여부')
+        .select('*')
+        .eq('성별', '계')
+        .eq('연령별', '20~34세')
+        .order('시점', { ascending: false })
+        .limit(3);
+
+      if (majorData?.length > 0) {
+        relevantData.majorMatch = majorData;
+        relevantData.sources.push('최종학교 전공일치 여부');
+        relevantData.dataPoints += majorData.length;
+      }
+    }
+
     // 일반적인 질문이거나 키워드가 명확하지 않은 경우 최신 종합 데이터 제공
     if (relevantData.sources.length === 0) {
       console.log('No specific keywords found, providing general overview data');
       
-      const [employmentResult, salaryResult] = await Promise.all([
+      const [employmentResult, salaryResult, majorResult] = await Promise.all([
         supabase
           .from('연령별_경제활동상태')
           .select('*')
@@ -227,6 +245,13 @@ async function searchRelevantData(supabase: any, question: string) {
           .select('*')
           .eq('성별', '계')
           .eq('연령구분', '20~34세')
+          .order('시점', { ascending: false })
+          .limit(2),
+        supabase
+          .from('성별_최종학교_전공일치_여부')
+          .select('*')
+          .eq('성별', '계')
+          .eq('연령별', '20~34세')
           .order('시점', { ascending: false })
           .limit(2)
       ]);
@@ -241,6 +266,12 @@ async function searchRelevantData(supabase: any, question: string) {
         relevantData.salary = salaryResult.data;
         relevantData.sources.push('첫 일자리 월평균임금 (일반)');
         relevantData.dataPoints += salaryResult.data.length;
+      }
+
+      if (majorResult.data?.length > 0) {
+        relevantData.majorMatch = majorResult.data;
+        relevantData.sources.push('최종학교 전공일치 여부 (일반)');
+        relevantData.dataPoints += majorResult.data.length;
       }
     }
 
@@ -280,6 +311,13 @@ function buildContext(relevantData: any): string {
     context += "\n=== 첫 취업 소요기간 ===\n";
     relevantData.employmentDuration.forEach((item: any) => {
       context += `- ${item.시점}: 평균 ${item["첫 취업 평균소요기간"]}개월, 전체 취업경험자 ${item["졸업ㆍ중퇴 후 취업 유경험자 전체"]}천명, 3개월미만 ${item["3개월 미만"]}천명, 3~6개월 ${item["3~6개월 미만"]}천명, 6개월~1년 ${item["6개월~1년 미만"]}천명\n`;
+    });
+  }
+
+  if (relevantData.majorMatch) {
+    context += "\n=== 전공 일치 여부 ===\n";
+    relevantData.majorMatch.forEach((item: any) => {
+      context += `- ${item.시점}: 전체 ${item.계}천명, 매우 일치 ${item["매우 일치"]}천명, 그런대로 일치 ${item["그런대로 일치"]}천명, 약간 불일치 ${item["약간 불일치"]}천명, 매우 불일치 ${item["매우 불일치"]}천명\n`;
     });
   }
 
