@@ -273,43 +273,43 @@ const DataStatusCard = () => {
 
   return (
     <Card className="bg-gradient-to-br from-primary/5 to-accent/10 border-2 border-primary/20 shadow-lg hover:shadow-xl transition-all duration-300">
-      <CardHeader className="pb-4">
-        <CardTitle className="text-foreground flex items-center gap-3 text-xl">
-          <div className="w-10 h-10 bg-primary/15 rounded-full flex items-center justify-center">
-            <Database className="w-5 h-5 text-primary" />
+      <CardHeader className="pb-3">
+        <CardTitle className="text-foreground flex items-center gap-2 text-lg">
+          <div className="w-8 h-8 bg-primary/15 rounded-full flex items-center justify-center">
+            <Database className="w-4 h-4 text-primary" />
           </div>
           사용 데이터 현황
         </CardTitle>
-        <CardDescription className="text-muted-foreground text-base">
+        <CardDescription className="text-muted-foreground">
           현재 대시보드에서 활용 중인 데이터셋 정보 및 다운로드
         </CardDescription>
       </CardHeader>
       
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-4">
         {/* 요약 정보 */}
-        <div className="grid grid-cols-3 gap-4">
-          <div className="text-center p-4 bg-background/50 rounded-lg border border-border/50">
-            <div className="flex items-center justify-center gap-2 mb-2">
+        <div className="grid grid-cols-3 gap-3">
+          <div className="text-center p-3 bg-background/50 rounded-lg border border-border/50">
+            <div className="flex items-center justify-center gap-2 mb-1">
               <FileText className="w-4 h-4 text-primary" />
               <span className="text-sm font-medium text-muted-foreground">총 테이블</span>
             </div>
-            <span className="text-2xl font-bold text-primary">{totalTables}개</span>
+            <span className="text-xl font-bold text-primary">{totalTables}개</span>
           </div>
           
-          <div className="text-center p-4 bg-background/50 rounded-lg border border-border/50">
-            <div className="flex items-center justify-center gap-2 mb-2">
+          <div className="text-center p-3 bg-background/50 rounded-lg border border-border/50">
+            <div className="flex items-center justify-center gap-2 mb-1">
               <Clock className="w-4 h-4 text-primary" />
               <span className="text-sm font-medium text-muted-foreground">분석 기간</span>
             </div>
-            <span className="text-lg font-bold text-primary">2004.05~현재</span>
+            <span className="text-base font-bold text-primary">2004.05~현재</span>
           </div>
           
-          <div className="text-center p-4 bg-background/50 rounded-lg border border-border/50">
-            <div className="flex items-center justify-center gap-2 mb-2">
+          <div className="text-center p-3 bg-background/50 rounded-lg border border-border/50">
+            <div className="flex items-center justify-center gap-2 mb-1">
               <Users className="w-4 h-4 text-primary" />
               <span className="text-sm font-medium text-muted-foreground">대상 연령</span>
             </div>
-            <span className="text-lg font-bold text-primary">청년층</span>
+            <span className="text-base font-bold text-primary">청년층</span>
           </div>
         </div>
 
@@ -333,8 +333,8 @@ const DataStatusCard = () => {
             </Button>
           </CollapsibleTrigger>
           
-          <CollapsibleContent className="mt-3">
-            <ScrollArea className="h-80 w-full">
+          <CollapsibleContent className="mt-2">
+            <ScrollArea className="h-60 w-full">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pr-4">
                 {dataList.map((data, index) => (
                   <div key={index} className="flex flex-col p-3 bg-background/70 rounded-lg border border-border/50 hover:bg-background/90 transition-colors">
