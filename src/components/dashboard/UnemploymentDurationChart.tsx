@@ -83,44 +83,53 @@ const UnemploymentDurationChart = ({ data, period }: UnemploymentDurationChartPr
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <ResponsiveContainer width="100%" height={350}>
-          <PieChart>
-            <Pie
-              data={data}
-              cx="50%"
-              cy="50%"
-              labelLine={false}
-              label={renderCustomizedLabel}
-              outerRadius={120}
-              fill="#8884d8"
-              dataKey="count"
-              nameKey="duration"
-              startAngle={90}
-              endAngle={-270}
-            >
-              {data.map((entry, index) => (
-                <Cell 
-                  key={`cell-${index}`} 
-                  fill={colors[index % colors.length]}
-                  stroke={hoveredIndex === index ? "#ffffff" : "none"}
-                  strokeWidth={hoveredIndex === index ? 3 : 0}
-                  style={{
-                    filter: hoveredIndex === index ? 'brightness(1.3) drop-shadow(0 4px 12px rgba(0,0,0,0.4))' : 'brightness(1)',
-                    transition: 'all 0.15s ease-out',
-                    cursor: 'pointer'
-                  }}
-                  onMouseEnter={() => onCellMouseEnter(index)}
-                  onMouseLeave={onCellMouseLeave}
-                />
-              ))}
-            </Pie>
-            <Tooltip content={<CustomTooltip />} />
-            <Legend 
-              wrapperStyle={{ paddingTop: '20px' }}
-              iconType="circle"
-            />
-          </PieChart>
-        </ResponsiveContainer>
+        <div className="flex items-center">
+          <ResponsiveContainer width="100%" height={350}>
+            <PieChart>
+              <Pie
+                data={data}
+                cx="65%"
+                cy="50%"
+                labelLine={false}
+                label={renderCustomizedLabel}
+                outerRadius={120}
+                fill="#8884d8"
+                dataKey="count"
+                nameKey="duration"
+                startAngle={90}
+                endAngle={-270}
+              >
+                {data.map((entry, index) => (
+                  <Cell 
+                    key={`cell-${index}`} 
+                    fill={colors[index % colors.length]}
+                    stroke={hoveredIndex === index ? "#ffffff" : "none"}
+                    strokeWidth={hoveredIndex === index ? 3 : 0}
+                    style={{
+                      filter: hoveredIndex === index ? 'brightness(1.3) drop-shadow(0 4px 12px rgba(0,0,0,0.4))' : 'brightness(1)',
+                      transition: 'all 0.15s ease-out',
+                      cursor: 'pointer'
+                    }}
+                    onMouseEnter={() => onCellMouseEnter(index)}
+                    onMouseLeave={onCellMouseLeave}
+                  />
+                ))}
+              </Pie>
+              <Tooltip content={<CustomTooltip />} />
+              <Legend 
+                verticalAlign="middle"
+                align="left"
+                layout="vertical"
+                wrapperStyle={{ 
+                  paddingLeft: '0px',
+                  paddingRight: '20px',
+                  lineHeight: '28px'
+                }}
+                iconType="circle"
+              />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
       </CardContent>
     </Card>
   );
