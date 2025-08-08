@@ -23,8 +23,7 @@ const StatsCard = ({ title, value, change, changeType = "neutral", icon: Icon, d
   };
 
   return (
-    <Card className="p-6 bg-gradient-card border-0 shadow-purple hover:shadow-large hover:scale-105 transition-all duration-300 cursor-pointer backdrop-blur-sm relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-primary opacity-0 hover:opacity-5 transition-opacity duration-300"></div>
+    <Card className="p-6 bg-card border border-border shadow-soft hover:shadow-medium hover:bg-primary/20 hover:scale-105 transition-all duration-300 cursor-pointer">
       <div className="flex items-center justify-between">
         <div className="space-y-2">
           <p className="text-sm font-medium text-muted-foreground">{title}</p>
@@ -40,8 +39,8 @@ const StatsCard = ({ title, value, change, changeType = "neutral", icon: Icon, d
             )}
           </div>
         </div>
-        <div className="w-12 h-12 bg-gradient-primary rounded-full flex items-center justify-center shadow-medium">
-          <Icon className="w-6 h-6 text-white" />
+        <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
+          <Icon className="w-6 h-6 text-primary" />
         </div>
       </div>
     </Card>
