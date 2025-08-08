@@ -11,7 +11,7 @@ const Header = () => {
             </div>
             <div>
               <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                청년 취업 현황 대시보드
+                청년 경제활동 현황 분석
               </h1>
               <p className="text-muted-foreground text-sm font-medium">Youth Employment Status Dashboard</p>
             </div>
