@@ -14,10 +14,10 @@ serve(async (req) => {
 
   try {
     const { question } = await req.json();
-    const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+    const anthropicApiKey = Deno.env.get('ANTHROPIC_API_KEY'); // Anthropic API 키로 변경
     
-    if (!openAIApiKey) {
-      throw new Error('OpenAI API key not found');
+    if (!anthropicApiKey) {
+      throw new Error('Anthropic API key not found');
     }
 
     // Initialize Supabase client
@@ -77,35 +77,34 @@ ${context}
 - 모든 수식과 계산은 일반 텍스트로만 표현하세요
 `;
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
+        'x-api-key': anthropicApiKey, // 변수명 수정
         'Content-Type': 'application/json',
+        'anthropic-version': '2023-06-01'
       },
       body: JSON.stringify({
-        model: 'gpt-4.1-2025-04-14', // 최신 GPT-4.1 모델로 업그레이드
+        model: 'claude-sonnet-4-20250514', // 더 강력한 Claude 4 모델로 변경
+        max_tokens: 2000, // 더 긴 답변 허용
         messages: [
-          {
-            role: 'system',
-            content: '당신은 한국의 청년 고용 통계 전문가입니다. 제공된 실제 데이터만을 기반으로 정확하고 객관적인 답변을 제공합니다. LaTeX 코드나 수학 마크업 언어는 절대 사용하지 말고 모든 수식을 일반 텍스트로만 표현하세요.'
-          },
           {
             role: 'user',
             content: prompt
           }
         ],
-        temperature: 0.1, // 낮은 temperature로 일관성 있는 답변
-        max_tokens: 1000
+        temperature: 0.1 // 낮은 temperature로 일관성 있는 답변
       }),
     });
 
     if (!response.ok) {
-      throw new Error(`OpenAI API error: ${response.status}`);
+      const errorText = await response.text();
+      console.error('Anthropic API error response:', errorText);
+      throw new Error(`Anthropic API error: ${response.status}`);
     }
 
     const aiResponse = await response.json();
-    const answer = aiResponse.choices[0].message.content;
+    const answer = aiResponse.content[0].text;
 
     return new Response(JSON.stringify({
       success: true,
@@ -272,8 +271,7 @@ async function searchAllDatasets(supabase: any) {
       // 4. 성별 첫 취업 소요기간 및 평균소요기간
       supabase.from('성별_첫_취업_소요기간_및_평균소요기간')
         .select('*')
-        .eq('전체', '전체')
-        .eq('연령구분', '20~34세')
+        .eq('연령구분', '20~34세')  // 전체 필터 제거
         .order('시점', { ascending: false })
         .limit(5),
       
