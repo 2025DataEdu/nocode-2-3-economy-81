@@ -397,8 +397,15 @@ const PredictionAnalysis = () => {
               </CardHeader>
               <CardContent>
                 <div className="grid gap-4">
-                  {predictionData.growth_industries.map((industry, index) => (
-                    <Card key={index} className="group border border-border/50 bg-gradient-to-r from-card to-card/50 hover:bg-primary/5 hover:border-primary/40 hover-scale transition-colors shadow-sm hover:shadow-md">
+                  {predictionData.growth_industries.map((industry, index) => {
+                    const handleIndustryClick = () => {
+                      const encodedIndustry = encodeURIComponent(industry.industry);
+                      const url = `https://www.saramin.co.kr/zf_user/search?search_area=main&searchword=${encodedIndustry}`;
+                      window.open(url, '_blank');
+                    };
+
+                    return (
+                    <Card key={index} className="group border border-border/50 bg-gradient-to-r from-card to-card/50 hover:bg-primary/5 hover:border-primary/40 hover-scale transition-colors shadow-sm hover:shadow-md cursor-pointer" onClick={handleIndustryClick}>
                       <CardContent className="pt-4">
                         <div className="flex items-start gap-4">
                           <div className="flex-shrink-0">
@@ -426,8 +433,9 @@ const PredictionAnalysis = () => {
                           </div>
                         </div>
                       </CardContent>
-                    </Card>
-                  ))}
+                        </Card>
+                      );
+                    })}
                 </div>
               </CardContent>
             </Card>

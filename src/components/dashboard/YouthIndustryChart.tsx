@@ -46,13 +46,6 @@ const YouthIndustryChart = ({ data, totalEmployed, period }: YouthIndustryChartP
       .substring(0, 12);
   };
 
-  // 산업별 구인사이트 링크 생성
-  const handleIndustryClick = (industryName: string) => {
-    const encodedIndustry = encodeURIComponent(industryName);
-    const url = `https://www.saramin.co.kr/zf_user/search?search_area=main&searchword=${encodedIndustry}`;
-    window.open(url, '_blank');
-  };
-
   // 데이터를 막대차트용으로 변환 (이미 정렬되어 있음)
   const chartData = data.map((item, index) => ({
     name: shortenIndustryName(item.industry),
@@ -122,15 +115,9 @@ const YouthIndustryChart = ({ data, totalEmployed, period }: YouthIndustryChartP
             <Bar 
               dataKey="value" 
               radius={[4, 4, 0, 0]}
-              onClick={(data) => handleIndustryClick(data.fullName)}
-              className="cursor-pointer"
             >
               {chartData.map((entry, index) => (
-                <Cell 
-                  key={`cell-${index}`} 
-                  fill={entry.color}
-                  style={{ cursor: 'pointer' }}
-                />
+                <Cell key={`cell-${index}`} fill={entry.color} />
               ))}
             </Bar>
           </BarChart>
