@@ -13,7 +13,6 @@ interface UnemploymentDurationChartProps {
 
 const UnemploymentDurationChart = ({ data, period }: UnemploymentDurationChartProps) => {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-  const [clickedIndex, setClickedIndex] = useState<number | null>(null);
   
   const colors = [
     "hsl(var(--chart-primary))",
@@ -31,11 +30,6 @@ const UnemploymentDurationChart = ({ data, period }: UnemploymentDurationChartPr
 
   const onCellMouseLeave = () => {
     setHoveredIndex(null);
-  };
-
-  // 클릭 이벤트 핸들러
-  const onCellClick = (index: number) => {
-    setClickedIndex(clickedIndex === index ? null : index);
   };
 
   const CustomTooltip = ({ active, payload }: any) => {
@@ -91,37 +85,35 @@ const UnemploymentDurationChart = ({ data, period }: UnemploymentDurationChartPr
       <CardContent>
         <ResponsiveContainer width="100%" height={350}>
           <PieChart>
-            {data.map((entry, index) => {
-              const isClicked = clickedIndex === index;
-              const isHovered = hoveredIndex === index;
-              
-              return (
-                <Pie
-                  key={`pie-${index}`}
-                  data={[entry]}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={isClicked || isHovered ? renderCustomizedLabel : undefined}
-                  outerRadius={isClicked ? 140 : (isHovered ? 125 : 120)}
+            <Pie
+              data={data}
+              cx="50%"
+              cy="50%"
+              labelLine={false}
+              label={renderCustomizedLabel}
+              outerRadius={120}
+              fill="#8884d8"
+              dataKey="count"
+              nameKey="duration"
+              startAngle={90}
+              endAngle={-270}
+            >
+              {data.map((entry, index) => (
+                <Cell 
+                  key={`cell-${index}`} 
                   fill={colors[index % colors.length]}
-                  dataKey="count"
-                  nameKey="duration"
-                  startAngle={90}
-                  endAngle={-270}
-                  stroke={isHovered ? "#ffffff" : "none"}
-                  strokeWidth={isHovered ? 3 : 0}
+                  stroke={hoveredIndex === index ? "#ffffff" : "none"}
+                  strokeWidth={hoveredIndex === index ? 3 : 0}
                   style={{
-                    filter: isHovered ? 'brightness(1.3) drop-shadow(0 4px 12px rgba(0,0,0,0.4))' : 'brightness(1)',
-                    transition: 'all 0.3s ease-out',
+                    filter: hoveredIndex === index ? 'brightness(1.3) drop-shadow(0 4px 12px rgba(0,0,0,0.4))' : 'brightness(1)',
+                    transition: 'all 0.15s ease-out',
                     cursor: 'pointer'
                   }}
                   onMouseEnter={() => onCellMouseEnter(index)}
                   onMouseLeave={onCellMouseLeave}
-                  onClick={() => onCellClick(index)}
                 />
-              );
-            })}
+              ))}
+            </Pie>
             <Tooltip content={<CustomTooltip />} />
             <Legend 
               wrapperStyle={{ paddingTop: '20px' }}
