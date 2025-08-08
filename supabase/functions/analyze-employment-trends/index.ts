@@ -165,6 +165,29 @@ ${JSON.stringify(processedEmploymentDurationData?.slice(-5), null, 2)}
     },
     "confidence_level": "전체 예측 신뢰도 (높음/보통/낮음)"
   },
+  "growth_industries": [
+    {
+      "rank": 1,
+      "industry": "성장 산업명",
+      "growth_potential": "성장 잠재력 설명 (50자 이내)",
+      "employment_forecast": "청년층 고용 전망 (50자 이내)",
+      "key_factors": ["핵심 요인1", "핵심 요인2", "핵심 요인3"]
+    },
+    {
+      "rank": 2,
+      "industry": "성장 산업명",
+      "growth_potential": "성장 잠재력 설명 (50자 이내)",
+      "employment_forecast": "청년층 고용 전망 (50자 이내)",
+      "key_factors": ["핵심 요인1", "핵심 요인2", "핵심 요인3"]
+    },
+    {
+      "rank": 3,
+      "industry": "성장 산업명",
+      "growth_potential": "성장 잠재력 설명 (50자 이내)",
+      "employment_forecast": "청년층 고용 전망 (50자 이내)",
+      "key_factors": ["핵심 요인1", "핵심 요인2", "핵심 요인3"]
+    }
+  ],
   "policy_recommendations": [
     {
       "category": "정책 분야",
@@ -177,7 +200,7 @@ ${JSON.stringify(processedEmploymentDurationData?.slice(-5), null, 2)}
   ]
 }
 
-JSON 형식으로만 응답하고, 모든 데이터를 종합 분석한 현실적인 예측과 실용적인 정책을 제안해주세요.
+JSON 형식으로만 응답하고, 모든 데이터를 종합 분석하여 한국 상황에 맞는 현실적인 성장 산업 TOP3과 예측, 실용적인 정책을 제안해주세요.
 `;
 
     console.log('Sending request to OpenAI...');

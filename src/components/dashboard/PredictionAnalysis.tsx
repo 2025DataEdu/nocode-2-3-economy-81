@@ -41,6 +41,13 @@ interface PredictionData {
     };
     confidence_level: string;
   };
+  growth_industries: Array<{
+    rank: number;
+    industry: string;
+    growth_potential: string;
+    employment_forecast: string;
+    key_factors: string[];
+  }>;
   policy_recommendations: Array<{
     category: string;
     title: string;
@@ -375,6 +382,56 @@ const PredictionAnalysis = () => {
               </CardContent>
             </Card>
           </div>
+
+          {/* Growth Industries */}
+          {predictionData.growth_industries && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <TrendingUp className="w-5 h-5" />
+                  AI 예측 핵심 성장 산업 TOP3
+                </CardTitle>
+                <CardDescription>
+                  청년층 취업 전망이 밝은 미래 성장 산업 분석
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-4">
+                  {predictionData.growth_industries.map((industry, index) => (
+                    <Card key={index} className="border border-border/50 bg-gradient-to-r from-card to-card/50">
+                      <CardContent className="pt-4">
+                        <div className="flex items-start gap-4">
+                          <div className="flex-shrink-0">
+                            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                              <span className="text-sm font-bold text-primary">{industry.rank}</span>
+                            </div>
+                          </div>
+                          <div className="flex-1 space-y-2">
+                            <h4 className="font-semibold text-foreground text-lg">{industry.industry}</h4>
+                            <div className="space-y-1">
+                              <p className="text-sm text-muted-foreground">
+                                <span className="font-medium">성장 잠재력:</span> {industry.growth_potential}
+                              </p>
+                              <p className="text-sm text-muted-foreground">
+                                <span className="font-medium">고용 전망:</span> {industry.employment_forecast}
+                              </p>
+                            </div>
+                            <div className="flex flex-wrap gap-1 mt-2">
+                              {industry.key_factors.map((factor, idx) => (
+                                <Badge key={idx} variant="secondary" className="text-xs">
+                                  {factor}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Policy Recommendations */}
           <Card>
