@@ -55,10 +55,25 @@ const Index = () => {
       
       <main className="container mx-auto px-6 py-8">
         <Tabs defaultValue="dashboard" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="dashboard">데이터 대시보드</TabsTrigger>
-            <TabsTrigger value="analysis">AI 분석 도구</TabsTrigger>
-            <TabsTrigger value="chatbot">AI 챗봇</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-3 bg-muted/50 p-2 rounded-lg border shadow-sm">
+            <TabsTrigger 
+              value="dashboard" 
+              className="text-sm font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm transition-all duration-200 rounded-md"
+            >
+              데이터 대시보드
+            </TabsTrigger>
+            <TabsTrigger 
+              value="analysis" 
+              className="text-sm font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm transition-all duration-200 rounded-md"
+            >
+              AI 분석 도구
+            </TabsTrigger>
+            <TabsTrigger 
+              value="chatbot" 
+              className="text-sm font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm transition-all duration-200 rounded-md"
+            >
+              AI 챗봇
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="dashboard" className="space-y-6">
