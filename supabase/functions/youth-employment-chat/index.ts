@@ -129,194 +129,225 @@ async function searchRelevantData(supabase: any, question: string) {
     unemployment: null,
     employmentDuration: null,
     majorMatch: null,
-    industryEmployment: null
+    industryEmployment: null,
+    allDatasets: null
   };
 
   // 키워드 기반으로 관련 데이터 검색 (유의어 포함)
   const questionLower = question.toLowerCase();
   
-  // 유의어 매핑
-  const synonyms = {
-    취업분포: ['취업분포', '산업별 취업', '업종별 취업', '직업분포', '일자리 분포', '고용분포'],
-    고용률: ['고용률', '취업률', '일자리율'],
-    실업률: ['실업률', '무직률', '비취업률'],
-    취업자: ['취업자', '고용자', '일자리', '직장인'],
-    임금: ['임금', '월급', '급여', '소득', '연봉', '수입'],
-    미취업: ['미취업', '구직', '무직', '실업'],
-    전공: ['전공', '학과', '전공일치', '전공과 일치'],
-    청년: ['청년', '청년층', '젊은층', '20대', '30대']
-  };
-
-  // 질문에서 유의어 검색
-  function hasKeyword(keywords: string[]): boolean {
-    return keywords.some(keyword => questionLower.includes(keyword));
-  }
+  console.log('Searching for keywords in question:', questionLower);
   
   try {
-    console.log('Searching for keywords in question:', questionLower);
-    
-    // 산업별 취업분포 관련 질문 (가장 먼저 체크)
-    if (questionLower.includes('취업분포') || questionLower.includes('산업별 취업') || 
-        questionLower.includes('업종별 취업') || questionLower.includes('직업분포') || 
-        questionLower.includes('일자리 분포') || questionLower.includes('고용분포') ||
-        questionLower.includes('산업') || questionLower.includes('업종') || questionLower.includes('분포')) {
-      
-      console.log('Searching for industry employment data...');
-      
-      const { data: industryData, error: industryError } = await supabase
-        .from('졸업_중퇴_취업자의_산업별_취업분포_11차')
-        .select('*')
-        .eq('연령구분(1)', '20~34세')
-        .order('시점', { ascending: false })
-        .limit(20);
-      
-      console.log('Industry data result:', industryData?.length || 0, 'rows, error:', industryError);
-      
-      if (industryData?.length > 0) {
-        relevantData.industryEmployment = industryData;
-        relevantData.sources.push('졸업중퇴 취업자의 산업별 취업분포');
-        relevantData.dataPoints += industryData.length;
-        console.log('Added industry employment data to relevant data');
-      }
-    }
-
-    // 고용률/실업률 관련 질문
-    if (hasKeyword(synonyms.고용률) || hasKeyword(synonyms.실업률) || 
-        hasKeyword(synonyms.취업자) || questionLower.includes('경제활동')) {
-      
-      const { data: employmentData } = await supabase
-        .from('연령별_경제활동상태')
+    // 모든 데이터셋을 병렬로 검색 (21개 데이터셋 모두 활용)
+    const [
+      employmentResult,
+      salaryResult,
+      unemploymentResult,
+      durationResult,
+      majorResult,
+      industryResult,
+      schoolStatusResult,
+      graduationDurationResult,
+      vocationalTrainingResult,
+      workExperienceResult,
+      firstJobIndustryResult,
+      firstJobOccupationResult,
+      quitReasonResult,
+      jobSearchRouteResult,
+      leaveExperienceResult,
+      workExperienceTypeResult,
+      unemploymentActivityResult,
+      jobExamPrepResult,
+      continuousEmploymentResult
+    ] = await Promise.all([
+      // 1. 연령별 경제활동상태
+      supabase.from('연령별_경제활동상태')
         .select('*')
         .eq('연령별', '20~34세')
         .eq('수학여부', '전체')
         .order('시점', { ascending: false })
-        .limit(5);
+        .limit(5),
       
-      if (employmentData?.length > 0) {
-        relevantData.employment = employmentData;
-        relevantData.sources.push('연령별 경제활동상태');
-        relevantData.dataPoints += employmentData.length;
-      }
-    }
-
-    // 임금 관련 질문
-    if (hasKeyword(synonyms.임금)) {
-      
-      const { data: salaryData } = await supabase
-        .from('성별_첫_일자리_월평균임금')
+      // 2. 성별 첫 일자리 월평균임금
+      supabase.from('성별_첫_일자리_월평균임금')
         .select('*')
         .eq('성별', '계')
         .eq('연령구분', '20~34세')
         .order('시점', { ascending: false })
-        .limit(3);
+        .limit(5),
       
-      if (salaryData?.length > 0) {
-        relevantData.salary = salaryData;
-        relevantData.sources.push('첫 일자리 월평균임금');
-        relevantData.dataPoints += salaryData.length;
-      }
-    }
-
-    // 미취업 기간 관련 질문
-    if (hasKeyword(synonyms.미취업) || questionLower.includes('취업 기간') || questionLower.includes('구직활동')) {
-      
-      const { data: unemploymentData } = await supabase
-        .from('성별_미취업기간별_미취업자')
+      // 3. 성별 미취업기간별 미취업자
+      supabase.from('성별_미취업기간별_미취업자')
         .select('*')
         .eq('성별', '계')
         .eq('연령별', '20~34세')
         .order('시점', { ascending: false })
-        .limit(3);
+        .limit(5),
       
-      if (unemploymentData?.length > 0) {
-        relevantData.unemployment = unemploymentData;
-        relevantData.sources.push('미취업 기간별 분포');
-        relevantData.dataPoints += unemploymentData.length;
-      }
-    }
-
-    // 취업 소요기간 관련 질문
-    if (questionLower.includes('취업 소요') || questionLower.includes('첫 취업') || 
-        questionLower.includes('취업까지') || questionLower.includes('졸업 후')) {
-      
-      const { data: durationData } = await supabase
-        .from('성별_첫_취업_소요기간_및_평균소요기간')
+      // 4. 성별 첫 취업 소요기간 및 평균소요기간
+      supabase.from('성별_첫_취업_소요기간_및_평균소요기간')
         .select('*')
         .eq('전체', '전체')
         .eq('연령구분', '20~34세')
         .order('시점', { ascending: false })
-        .limit(3);
+        .limit(5),
       
-      if (durationData?.length > 0) {
-        relevantData.employmentDuration = durationData;
-        relevantData.sources.push('첫 취업 소요기간');
-        relevantData.dataPoints += durationData.length;
-      }
-    }
-
-    // 전공 일치 여부 관련 질문
-    if (hasKeyword(synonyms.전공) || questionLower.includes('일치 여부') || questionLower.includes('일치여부')) {
-      const { data: majorData } = await supabase
-        .from('성별_최종학교_전공일치_여부')
+      // 5. 성별 최종학교 전공일치 여부
+      supabase.from('성별_최종학교_전공일치_여부')
         .select('*')
         .eq('성별', '계')
         .eq('연령별', '20~34세')
         .order('시점', { ascending: false })
-        .limit(3);
-
-      if (majorData?.length > 0) {
-        relevantData.majorMatch = majorData;
-        relevantData.sources.push('최종학교 전공일치 여부');
-        relevantData.dataPoints += majorData.length;
-      }
-    }
-
-    // 일반적인 질문이거나 키워드가 명확하지 않은 경우 최신 종합 데이터 제공
-    if (relevantData.sources.length === 0) {
-      console.log('No specific keywords found, providing general overview data');
+        .limit(5),
       
-      const [employmentResult, salaryResult, majorResult] = await Promise.all([
-        supabase
-          .from('연령별_경제활동상태')
-          .select('*')
-          .eq('연령별', '20~34세')
-          .eq('수학여부', '전체')
-          .order('시점', { ascending: false })
-          .limit(2),
-        supabase
-          .from('성별_첫_일자리_월평균임금')
-          .select('*')
-          .eq('성별', '계')
-          .eq('연령구분', '20~34세')
-          .order('시점', { ascending: false })
-          .limit(2),
-        supabase
-          .from('성별_최종학교_전공일치_여부')
-          .select('*')
-          .eq('성별', '계')
-          .eq('연령별', '20~34세')
-          .order('시점', { ascending: false })
-          .limit(2)
-      ]);
+      // 6. ★★★ 졸업중퇴 취업자의 산업별 취업분포 (핵심)
+      supabase.from('졸업_중퇴_취업자의_산업별_취업분포_11차')
+        .select('*')
+        .eq('연령구분(1)', '20~34세')
+        .order('시점', { ascending: false })
+        .limit(20),
+      
+      // 7. 연령별 수학여부
+      supabase.from('연령별_수학여부')
+        .select('*')
+        .eq('연령별', '20~34세')
+        .order('시점', { ascending: false })
+        .limit(3),
+      
+      // 8. 성 및 학제별 대학졸업소요기간
+      supabase.from('성_및_학제별_대학졸업소요기간')
+        .select('*')
+        .eq('성별', '계')
+        .eq('연령구분', '20~34세')
+        .order('시점', { ascending: false })
+        .limit(3),
+      
+      // 9. 성별 직업교육 훈련 경험 유무 및 시기
+      supabase.from('성별_직업교육_훈련__경험_유무_및_시기')
+        .select('*')
+        .eq('성별', '계')
+        .eq('연령구분', '20~34세')
+        .order('시점', { ascending: false })
+        .limit(3),
+      
+      // 10. 성별 취업경험유무 및 횟수
+      supabase.from('성별_취업경험유무_및_횟수_졸업_중퇴_인구')
+        .select('*')
+        .eq('성별', '계')
+        .eq('연령구분', '20~34세')
+        .order('시점', { ascending: false })
+        .limit(3),
+      
+      // 11. 성별 첫일자리 산업
+      supabase.from('성별_첫일자리_산업_졸업_중퇴_취업유경험자')
+        .select('*')
+        .eq('성별', '계')
+        .eq('연령구분', '20~34세')
+        .order('시점', { ascending: false })
+        .limit(5),
+      
+      // 12. 성별 첫일자리 직업
+      supabase.from('성별_첫일자리_직업_졸업_중퇴취업유경험자')
+        .select('*')
+        .eq('성별', '계')
+        .eq('연령구분', '20~34세')
+        .order('시점', { ascending: false })
+        .limit(5),
+      
+      // 13. 성별 첫일자리를 그만둔 사유
+      supabase.from('성별_첫일자리를_그만둔_사유')
+        .select('*')
+        .eq('성별', '계')
+        .eq('연령구분', '20~34세')
+        .order('시점', { ascending: false })
+        .limit(3),
+      
+      // 14. 성별 학력별 취업경로
+      supabase.from('성별_학력별_취업경로__졸업_중퇴_취업자')
+        .select('*')
+        .eq('성별', '계')
+        .eq('연령구분', '20~34세')
+        .order('시점', { ascending: false })
+        .limit(5),
+      
+      // 15. 성별 휴학경험유무 평균휴학기간
+      supabase.from('성별_휴학경험유무_평균휴학기간_대졸자')
+        .select('*')
+        .eq('성별', '계')
+        .eq('연령구분', '20~34세')
+        .order('시점', { ascending: false })
+        .limit(3),
+      
+      // 16. 성별 직장체험형태
+      supabase.from('성별_직장체험형태_직장체험경험자')
+        .select('*')
+        .eq('성별', '계')
+        .eq('연령구분', '20~34세')
+        .order('시점', { ascending: false })
+        .limit(3),
+      
+      // 17. 성별 미취업기간활동별 미취업자
+      supabase.from('성별_미취업기간활동별_미취업자')
+        .select('*')
+        .eq('성별', '계')
+        .eq('연령별', '20~34세')
+        .order('시점', { ascending: false })
+        .limit(3),
+      
+      // 18. 성별 취업시험준비유무 및 준비분야
+      supabase.from('성별_취업시험준비유무_및_준비분야_비경제활')
+        .select('*')
+        .eq('성별', '계')
+        .eq('연령구분', '20~34세')
+        .order('시점', { ascending: false })
+        .limit(3),
+      
+      // 19. 첫직장 근속기간
+      supabase.from('첫직장_근속기간')
+        .select('*')
+        .eq('연령구분', '20~34세')
+        .order('시점', { ascending: false })
+        .limit(3)
+    ]);
 
-      if (employmentResult.data?.length > 0) {
-        relevantData.employment = employmentResult.data;
-        relevantData.sources.push('연령별 경제활동상태 (일반)');
-        relevantData.dataPoints += employmentResult.data.length;
-      }
+    // 결과 로깅 및 데이터 수집
+    const results = [
+      { name: '연령별 경제활동상태', data: employmentResult.data, key: 'employment' },
+      { name: '첫 일자리 월평균임금', data: salaryResult.data, key: 'salary' },
+      { name: '미취업 기간별 분포', data: unemploymentResult.data, key: 'unemployment' },
+      { name: '첫 취업 소요기간', data: durationResult.data, key: 'employmentDuration' },
+      { name: '전공 일치 여부', data: majorResult.data, key: 'majorMatch' },
+      { name: '★산업별 취업분포★', data: industryResult.data, key: 'industryEmployment' },
+      { name: '수학여부', data: schoolStatusResult.data, key: 'schoolStatus' },
+      { name: '대학졸업소요기간', data: graduationDurationResult.data, key: 'graduationDuration' },
+      { name: '직업교육훈련경험', data: vocationalTrainingResult.data, key: 'vocationalTraining' },
+      { name: '취업경험유무', data: workExperienceResult.data, key: 'workExperience' },
+      { name: '첫일자리산업', data: firstJobIndustryResult.data, key: 'firstJobIndustry' },
+      { name: '첫일자리직업', data: firstJobOccupationResult.data, key: 'firstJobOccupation' },
+      { name: '퇴직사유', data: quitReasonResult.data, key: 'quitReason' },
+      { name: '취업경로', data: jobSearchRouteResult.data, key: 'jobSearchRoute' },
+      { name: '휴학경험', data: leaveExperienceResult.data, key: 'leaveExperience' },
+      { name: '직장체험형태', data: workExperienceTypeResult.data, key: 'workExperienceType' },
+      { name: '미취업활동', data: unemploymentActivityResult.data, key: 'unemploymentActivity' },
+      { name: '취업시험준비', data: jobExamPrepResult.data, key: 'jobExamPrep' },
+      { name: '근속기간', data: continuousEmploymentResult.data, key: 'continuousEmployment' }
+    ];
 
-      if (salaryResult.data?.length > 0) {
-        relevantData.salary = salaryResult.data;
-        relevantData.sources.push('첫 일자리 월평균임금 (일반)');
-        relevantData.dataPoints += salaryResult.data.length;
+    // 모든 데이터 수집 및 로깅
+    results.forEach(result => {
+      const dataCount = result.data?.length || 0;
+      console.log(`${result.name}: ${dataCount} rows`);
+      
+      if (dataCount > 0) {
+        relevantData[result.key] = result.data;
+        relevantData.sources.push(result.name);
+        relevantData.dataPoints += dataCount;
       }
+    });
 
-      if (majorResult.data?.length > 0) {
-        relevantData.majorMatch = majorResult.data;
-        relevantData.sources.push('최종학교 전공일치 여부 (일반)');
-        relevantData.dataPoints += majorResult.data.length;
-      }
-    }
+    console.log(`Total data points collected: ${relevantData.dataPoints}`);
+    console.log(`Data sources: ${relevantData.sources.join(', ')}`);
 
   } catch (error) {
     console.error('Error searching relevant data:', error);
@@ -368,6 +399,42 @@ function buildContext(relevantData: any): string {
     context += "\n=== 산업별 취업분포 (졸업중퇴 취업자) ===\n";
     relevantData.industryEmployment.forEach((item: any) => {
       context += `- ${item.시점}: 산업분야 ${item["산업별(1)"]}, 졸업중퇴 청년층 취업자 ${item["졸업/중퇴 청년층 취업자"]}천명, 전체 취업자 ${item["전체 취업자"]}천명\n`;
+    });
+  }
+
+  // 추가 데이터셋들도 컨텍스트에 포함
+  if (relevantData.schoolStatus) {
+    context += "\n=== 수학여부 (재학/졸업/중퇴) ===\n";
+    relevantData.schoolStatus.forEach((item: any) => {
+      context += `- ${item.시점}: 청년층인구 전체 ${item["청년층인구 전체"]}천명, 재학 ${item["재학"]}천명, 졸업/중퇴 ${item["졸업/중퇴"]}천명, 휴학 ${item["휴학"]}천명\n`;
+    });
+  }
+
+  if (relevantData.firstJobIndustry) {
+    context += "\n=== 첫일자리 산업별 분포 ===\n";
+    relevantData.firstJobIndustry.forEach((item: any) => {
+      context += `- ${item.시점}: 제조업 ${item["광ㆍ제조업(BC)"]}천명, 도소매업 ${item["도매 및 소매업(G)"]}천명, 숙박음식점업 ${item["숙박 및 음식점업(I)"]}천명, 보건복지서비스업 ${item["보건업 및 사회복지 서비스업(Q)"]}천명\n`;
+    });
+  }
+
+  if (relevantData.firstJobOccupation) {
+    context += "\n=== 첫일자리 직업별 분포 ===\n";
+    relevantData.firstJobOccupation.forEach((item: any) => {
+      context += `- ${item.시점}: 관리자전문가 ${item["관리자ㆍ전문가"]}천명, 사무종사자 ${item["사무 종사자"]}천명, 서비스종사자 ${item["서비스 종사자"]}천명, 판매종사자 ${item["판매 종사자"]}천명\n`;
+    });
+  }
+
+  if (relevantData.workExperience) {
+    context += "\n=== 취업경험 유무 및 횟수 ===\n";
+    relevantData.workExperience.forEach((item: any) => {
+      context += `- ${item.시점}: 전체 ${item["졸업ㆍ중퇴 청년층인구 전체"]}천명, 취업경험있음 ${item["취업경험 있음"]}천명, 취업경험없음 ${item["취업경험 없음"]}천명\n`;
+    });
+  }
+
+  if (relevantData.vocationalTraining) {
+    context += "\n=== 직업교육훈련 경험 ===\n";
+    relevantData.vocationalTraining.forEach((item: any) => {
+      context += `- ${item.시점}: 청년층인구 전체 ${item["청년층 인구 전체"]}천명, 교육훈련경험있음 ${item["교육훈련 경험있음"]}천명, 교육훈련경험없음 ${item["교육훈련 경험없음"]}천명\n`;
     });
   }
 
