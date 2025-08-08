@@ -4,11 +4,11 @@ import StatsCard from "@/components/StatsCard";
 import EmploymentChart from "@/components/dashboard/EmploymentChart";
 import SalaryDistributionChart from "@/components/dashboard/SalaryDistributionChart";
 import UnemploymentDurationChart from "@/components/dashboard/UnemploymentDurationChart";
-import IndustryDistributionChart from "@/components/dashboard/IndustryDistributionChart";
+import IndustryPieChart from "@/components/dashboard/IndustryPieChart";
 import PredictionAnalysis from "@/components/dashboard/PredictionAnalysis";
 import YouthEmploymentChatbot from "@/components/chat/YouthEmploymentChatbot";
 import DataStatusCard from "@/components/dashboard/DataStatusCard";
-import { useEmploymentData, useLatestEmploymentStats, useSalaryData, useUnemploymentDurationData, useAverageSalaryData, useGenderGraduationData, useIndustryEmploymentDistributionData } from "@/hooks/useEconomicData";
+import { useEmploymentData, useLatestEmploymentStats, useSalaryData, useUnemploymentDurationData, useAverageSalaryData, useGenderGraduationData, useIndustryDistributionPieData } from "@/hooks/useEconomicData";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -19,7 +19,7 @@ const Index = () => {
   const { data: unemploymentDurationData, isLoading: unemploymentDurationLoading } = useUnemploymentDurationData();
   const { data: averageSalaryData, isLoading: averageSalaryLoading } = useAverageSalaryData();
   const { data: genderGraduationData, isLoading: genderGraduationLoading } = useGenderGraduationData();
-  const { data: industryDistribution, isLoading: industryLoading } = useIndustryEmploymentDistributionData();
+  const { data: industryPieData, isLoading: industryPieLoading } = useIndustryDistributionPieData();
 
   // 최신 데이터에서 통계 계산
   const totalUnemploymentCount = unemploymentDurationData?.data?.reduce((sum, item) => sum + item.count, 0) || 0;
@@ -31,7 +31,7 @@ const Index = () => {
     unemployment_rate: item.unemployment_rate
   })) || [];
 
-  if (employmentLoading || latestStatsLoading || salaryLoading || unemploymentDurationLoading || averageSalaryLoading || genderGraduationLoading || industryLoading) {
+  if (employmentLoading || latestStatsLoading || salaryLoading || unemploymentDurationLoading || averageSalaryLoading || genderGraduationLoading || industryPieLoading) {
     return (
       <div className="min-h-screen bg-background">
         <Header />
@@ -103,7 +103,7 @@ const Index = () => {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <UnemploymentDurationChart data={unemploymentDurationData?.data || []} period={unemploymentDurationData?.period} />
-              <IndustryDistributionChart data={industryDistribution?.data || []} period={industryDistribution?.period} />
+              <IndustryPieChart data={industryPieData?.data || []} period={industryPieData?.period} />
             </div>
           </TabsContent>
 
