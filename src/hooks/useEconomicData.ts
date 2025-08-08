@@ -179,7 +179,7 @@ export const useUnemploymentDurationData = () => {
       
       if (!data || data.length === 0) return { data: [], period: null };
 
-      const latestData = data[0];
+      const latestData = data[0] as any;
       const period = latestData.시점;
       
       
@@ -190,7 +190,7 @@ export const useUnemploymentDurationData = () => {
         { duration: "2~3년미만", count: parseInt((latestData["2~3년 미만"] || "0").toString()) },
         { duration: "3년이상", count: parseInt((latestData["3년 이상"] || "0").toString()) }
       ].map(item => {
-        const total = data[0]["계"] ? parseInt(data[0]["계"].toString()) : 0;
+        const total = latestData["계"] ? parseInt(latestData["계"].toString()) : 0;
         return {
           ...item,
           percentage: total > 0 ? parseFloat(((item.count / total) * 100).toFixed(1)) : 0
@@ -198,6 +198,48 @@ export const useUnemploymentDurationData = () => {
       }).filter(item => item.count > 0);
 
       return { data: unemploymentDuration, period };
+    },
+  });
+};
+
+// 졸업/중퇴 취업자의 산업별 취업분포 (최신 시점)
+export const useIndustryEmploymentDistributionData = () => {
+  return useQuery({
+    queryKey: ["industry-employment-distribution"],
+    queryFn: async () => {
+      // 최신 시점 조회
+      const { data: latestRow, error: latestErr } = await supabase
+        .from("졸업_중퇴_취업자의_산업별_취업분포_11차" as any)
+        .select("*")
+        .eq("연령구분(1)", "20~34세")
+        .order("시점", { ascending: false })
+        .limit(1);
+      if (latestErr) throw latestErr;
+      if (!latestRow || latestRow.length === 0) return { data: [], period: null };
+      const latestPeriod = (latestRow[0] as any).시점;
+
+      // 해당 시점의 전체 산업 행 불러오기
+      const { data, error } = await supabase
+        .from("졸업_중퇴_취업자의_산업별_취업분포_11차" as any)
+        .select("*")
+        .eq("연령구분(1)", "20~34세")
+        .eq("시점", latestPeriod)
+        .order("산업별(1)", { ascending: true });
+      if (error) throw error;
+
+      const rows = (data || []) as any[];
+      const mapped = rows.map((row) => ({
+        sector: (row["산업별(1)"] || "기타").toString(),
+        count: parseInt((row["졸업/중퇴 청년층 취업자"] || "0").toString())
+      }));
+      const total = mapped.reduce((s, r) => s + r.count, 0);
+      const withPct = mapped
+        .map((r) => ({ ...r, percentage: total > 0 ? parseFloat(((r.count / total) * 100).toFixed(1)) : 0 }))
+        .sort((a, b) => b.count - a.count);
+
+      // 너무 많으면 상위 8개만 표시
+      const top = withPct.slice(0, 8);
+      return { data: top, period: latestPeriod };
     },
   });
 };
