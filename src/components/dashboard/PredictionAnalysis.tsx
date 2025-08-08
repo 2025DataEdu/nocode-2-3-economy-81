@@ -106,9 +106,9 @@ const PredictionAnalysis = () => {
 
   const getConfidenceColor = (level: string) => {
     switch (level) {
-      case "높음": return "text-green-600";
-      case "보통": return "text-yellow-600";
-      case "낮음": return "text-red-600";
+      case "높음": return "text-primary";
+      case "보통": return "text-foreground/70";
+      case "낮음": return "text-destructive";
       default: return "text-muted-foreground";
     }
   };
@@ -398,7 +398,7 @@ const PredictionAnalysis = () => {
               <CardContent>
                 <div className="grid gap-4">
                   {predictionData.growth_industries.map((industry, index) => (
-                    <Card key={index} className="group border border-border/50 bg-gradient-to-r from-card to-card/50 hover:bg-accent/50 hover:border-primary/30 hover-scale transition-colors shadow-sm hover:shadow-md">
+                    <Card key={index} className="group border border-border/50 bg-gradient-to-r from-card to-card/50 hover:bg-primary/5 hover:border-primary/40 hover-scale transition-colors shadow-sm hover:shadow-md">
                       <CardContent className="pt-4">
                         <div className="flex items-start gap-4">
                           <div className="flex-shrink-0">
