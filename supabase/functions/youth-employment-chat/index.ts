@@ -286,12 +286,12 @@ async function searchAllDatasets(supabase: any) {
         .order('시점', { ascending: false })
         .limit(5),
       
-      // 6. ★★★ 졸업중퇴 취업자의 산업별 취업분포 (핵심) - 컬럼명 수정
+      // 6. ★★★ 졸업중퇴 취업자의 산업별 취업분포 (핵심) - 2025.05 최신 데이터만
       supabase.from('졸업_중퇴_취업자의_산업별_취업분포_11차')
         .select('*')
-        .eq('연령구분(1)', '20~34세')  // 올바른 컬럼명 사용
-        .order('시점', { ascending: false })
-        .limit(20),
+        .eq('연령구분(1)', '20~34세')
+        .eq('시점', 2025.05)  // 최신 데이터만 조회
+        .order('"졸업/중퇴 청년층 취업자"', { ascending: false }),
       
       // 7. 연령별 수학여부
       supabase.from('연령별_수학여부')
