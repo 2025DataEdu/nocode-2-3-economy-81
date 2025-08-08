@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from "recharts";
-import { TrendingUp, Brain, AlertCircle, Target, Clock, CheckCircle2 } from "lucide-react";
+import { TrendingUp, Brain, AlertCircle, Target, Clock, CheckCircle2, ExternalLink } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { supabase } from "@/integrations/supabase/client";
@@ -405,7 +405,7 @@ const PredictionAnalysis = () => {
                     };
 
                     return (
-                    <Card key={index} className="group border border-border/50 bg-gradient-to-r from-card to-card/50 hover:bg-primary/5 hover:border-primary/40 hover-scale transition-colors shadow-sm hover:shadow-md cursor-pointer" onClick={handleIndustryClick}>
+                    <Card key={index} className="group border border-border/50 bg-gradient-to-r from-card to-card/50 hover:bg-primary/5 hover:border-primary/40 hover-scale transition-colors shadow-sm hover:shadow-md">
                       <CardContent className="pt-4">
                         <div className="flex items-start gap-4">
                           <div className="flex-shrink-0">
@@ -414,7 +414,18 @@ const PredictionAnalysis = () => {
                             </div>
                           </div>
                           <div className="flex-1 space-y-2">
-                            <h4 className="font-semibold text-foreground text-lg">{industry.industry}</h4>
+                            <div className="flex items-center justify-between">
+                              <h4 className="font-semibold text-foreground text-lg">{industry.industry}</h4>
+                              <Button
+                                onClick={handleIndustryClick}
+                                variant="outline"
+                                size="sm"
+                                className="gap-1 text-xs px-2 py-1 h-auto"
+                              >
+                                <ExternalLink className="w-3 h-3" />
+                                취업 알아보기
+                              </Button>
+                            </div>
                             <div className="space-y-1">
                               <p className="text-sm text-muted-foreground">
                                 <span className="font-medium">성장 잠재력:</span> {industry.growth_potential}
