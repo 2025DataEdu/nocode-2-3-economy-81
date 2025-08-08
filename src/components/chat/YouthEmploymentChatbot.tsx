@@ -144,8 +144,8 @@ const YouthEmploymentChatbot = () => {
 
   const downloadChatHistory = async () => {
     try {
-      // 채팅 컨테이너 찾기
-      const chatContainer = scrollAreaRef.current;
+      // 채팅 메시지 컨테이너 찾기 (ScrollArea 안의 실제 메시지들)
+      const chatContainer = scrollAreaRef.current?.querySelector('[data-radix-scroll-area-viewport] > div > div');
       if (!chatContainer) {
         toast({
           title: "오류",
@@ -158,22 +158,47 @@ const YouthEmploymentChatbot = () => {
       // 로딩 상태 표시
       toast({
         title: "PDF 생성 중",
-        description: "채팅 기록을 PDF로 변환하고 있습니다...",
+        description: "전체 채팅 기록을 PDF로 변환하고 있습니다...",
       });
 
-      // HTML을 캔버스로 변환
-      const canvas = await html2canvas(chatContainer, {
+      // 임시로 스크롤 숨기고 전체 높이로 설정
+      const originalHeight = (chatContainer as HTMLElement).style.height;
+      const originalOverflow = (chatContainer as HTMLElement).style.overflow;
+      
+      (chatContainer as HTMLElement).style.height = 'auto';
+      (chatContainer as HTMLElement).style.overflow = 'visible';
+
+      // 약간의 딜레이로 DOM 업데이트 대기
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // HTML을 캔버스로 변환 - 전체 컨텐츠
+      const canvas = await html2canvas(chatContainer as HTMLElement, {
         scale: 2, // 고해상도
         useCORS: true,
         backgroundColor: '#ffffff',
-        width: chatContainer.scrollWidth,
-        height: chatContainer.scrollHeight,
+        width: (chatContainer as HTMLElement).scrollWidth,
+        height: (chatContainer as HTMLElement).scrollHeight,
+        scrollX: 0,
+        scrollY: 0,
+        allowTaint: true,
+        foreignObjectRendering: false,
         onclone: (clonedDoc) => {
-          // 복제된 문서에서 불필요한 요소들 제거
+          // 복제된 문서에서 스크롤바 제거
           const scrollbars = clonedDoc.querySelectorAll('[data-radix-scroll-area-scrollbar]');
           scrollbars.forEach(el => el.remove());
+          
+          // 모든 스크롤 관련 스타일 제거
+          const scrollElements = clonedDoc.querySelectorAll('[data-radix-scroll-area-viewport]');
+          scrollElements.forEach(el => {
+            (el as HTMLElement).style.overflow = 'visible';
+            (el as HTMLElement).style.height = 'auto';
+          });
         }
       });
+
+      // 원래 스타일 복원
+      (chatContainer as HTMLElement).style.height = originalHeight;
+      (chatContainer as HTMLElement).style.overflow = originalOverflow;
 
       // PDF 생성
       const pdf = new jsPDF({
@@ -182,29 +207,30 @@ const YouthEmploymentChatbot = () => {
         format: 'a4'
       });
 
-      const imgData = canvas.toDataURL('image/png');
-      const imgWidth = 210; // A4 width in mm
-      const pageHeight = 295; // A4 height in mm
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      let heightLeft = imgHeight;
-      let position = 0;
-
-      // 첫 페이지에 제목 추가
+      // 제목 및 헤더 추가
       pdf.setFontSize(16);
       pdf.text('Youth Employment Chat History', 20, 20);
       pdf.setFontSize(12);
       pdf.text(`Generated: ${new Date().toLocaleDateString('ko-KR')}`, 20, 30);
-      
-      // 이미지를 여러 페이지에 나누어 추가
-      position = 40; // 제목 아래부터 시작
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight - position;
+      pdf.text(`Total Messages: ${messages.length}`, 20, 37);
 
-      while (heightLeft >= 0) {
-        position = heightLeft - imgHeight + (pageHeight - position);
+      const imgData = canvas.toDataURL('image/png');
+      const imgWidth = 170; // 여백을 고려한 이미지 폭
+      const pageHeight = 295; // A4 height in mm
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+      let position = 45; // 헤더 아래부터 시작
+
+      // 첫 번째 이미지 추가
+      pdf.addImage(imgData, 'PNG', 20, position, imgWidth, imgHeight);
+      heightLeft -= (pageHeight - position);
+
+      // 필요하면 추가 페이지에 나머지 이미지 추가
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight + 20;
         pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
+        pdf.addImage(imgData, 'PNG', 20, position, imgWidth, imgHeight);
+        heightLeft -= (pageHeight - 20);
       }
 
       // PDF 저장
@@ -213,7 +239,7 @@ const YouthEmploymentChatbot = () => {
 
       toast({
         title: "다운로드 완료",
-        description: "채팅 기록이 한글 지원 PDF로 저장되었습니다.",
+        description: `전체 채팅 기록 (${messages.length}개 메시지)이 PDF로 저장되었습니다.`,
       });
 
     } catch (error) {
