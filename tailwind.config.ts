@@ -26,7 +26,9 @@ export default {
 				foreground: 'hsl(var(--foreground))',
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',
-					foreground: 'hsl(var(--primary-foreground))'
+					foreground: 'hsl(var(--primary-foreground))',
+					light: 'hsl(var(--primary-light))',
+					dark: 'hsl(var(--primary-dark))'
 				},
 				secondary: {
 					DEFAULT: 'hsl(var(--secondary))',
@@ -78,11 +80,14 @@ export default {
 			boxShadow: {
 				soft: 'var(--shadow-soft)',
 				medium: 'var(--shadow-medium)',
-				large: 'var(--shadow-large)'
+				large: 'var(--shadow-large)',
+				purple: 'var(--shadow-purple)'
 			},
 			backgroundImage: {
 				'gradient-primary': 'var(--gradient-primary)',
-				'gradient-secondary': 'var(--gradient-secondary)'
+				'gradient-secondary': 'var(--gradient-secondary)',
+				'gradient-background': 'var(--gradient-background)',
+				'gradient-card': 'var(--gradient-card)'
 			},
 			transitionTimingFunction: {
 				smooth: 'var(--transition-smooth)'
