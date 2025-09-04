@@ -84,7 +84,7 @@ ${context}
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-5-mini-2025-08-07',
+        model: 'gpt-4o-mini',
         max_completion_tokens: 2000,
         messages: [
           {
