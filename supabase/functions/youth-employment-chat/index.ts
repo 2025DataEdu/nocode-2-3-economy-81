@@ -85,7 +85,7 @@ ${context}
       },
       body: JSON.stringify({
         model: 'gpt-4.1-2025-04-14',
-        max_tokens: 2000,
+        max_completion_tokens: 2000,
         messages: [
           {
             role: 'system',
