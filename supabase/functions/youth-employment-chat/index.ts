@@ -13,10 +13,16 @@ serve(async (req) => {
   }
 
   try {
+    console.log('=== Starting youth-employment-chat function ===');
     const { question } = await req.json();
+    console.log('Received question:', question);
+    
     const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+    console.log('OpenAI API key exists:', !!openAIApiKey);
+    console.log('OpenAI API key length:', openAIApiKey?.length || 0);
     
     if (!openAIApiKey) {
+      console.error('ERROR: OpenAI API key not found in environment');
       throw new Error('OpenAI API key not found');
     }
 
@@ -84,7 +90,7 @@ ${context}
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'gpt-5-mini-2025-08-07',
         max_completion_tokens: 2000,
         messages: [
           {

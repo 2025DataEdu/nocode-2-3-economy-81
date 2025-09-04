@@ -212,7 +212,7 @@ JSON 형식으로만 응답하고, 모든 데이터를 종합 분석하여 한�
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini', // 빠르고 효율적인 모델로 변경
+        model: 'gpt-5-mini-2025-08-07', // 최신 GPT-5 mini 모델
         messages: [
           {
             role: 'system',
